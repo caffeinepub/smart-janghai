@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Replace visible “SMART JANGHAI” brand-name text with the existing logo image so the logo is the primary branding mark across the site.
+**Goal:** Remove all visible “SMART JANGHAI” / “Smart Janghai” branding text so the site branding is logo-only, while keeping resilient logo loading without text fallbacks.
 
 **Planned changes:**
-- Update the homepage hero branding to use the existing logo image asset instead of rendering “SMART JANGHAI” as visible text, ensuring only one logo mark is shown.
-- Update the footer branding area to display the logo image instead of a “SMART JANGHAI” text heading.
-- Preserve responsive sizing and the existing resilient image-loading/fallback behavior so missing logo assets don’t cause blank sections or runtime errors.
+- Remove brand-name text from the hero branding area so only the logo image is shown.
+- Remove brand-name text from the footer (e.g., update the copyright line so it no longer includes “Smart Janghai”).
+- Update the BrandLogo component so image-load failure uses a non-text placeholder fallback that preserves layout and keeps the page fully rendered.
 
-**User-visible outcome:** The site shows the logo image (not “SMART JANGHAI” text) as the main brand mark in the hero and footer, with responsive layout and graceful fallback if the image fails to load.
+**User-visible outcome:** The UI shows only the logo for branding (no “Smart Janghai” text in hero or footer), and if the logo fails to load a neutral non-text placeholder appears instead of any brand-name text.

@@ -1,57 +1,41 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Swap SMART JANGHAI text branding to logo image with resilient fallback",
+  "title": "Remove remaining Smart Janghai text branding and ensure non-text logo fallback",
   "requirements": [
     {
-      "id": "REQ-18",
-      "summary": "Replace visible SMART JANGHAI branding text in the UI with the existing logo image asset as the primary brand mark (hero + footer).",
+      "id": "REQ-20",
+      "summary": "Remove visible “SMART JANGHAI” / “Smart Janghai” branding text so branding is logo-only in hero and footer.",
       "acceptanceCriteria": [
-        "The homepage hero continues to display the logo image (not a \"SMART JANGHAI\" text heading) as the primary brand mark.",
-        "The footer branding area no longer renders \"SMART JANGHAI\" as a visible text heading and displays the logo image instead.",
-        "The logo image used for branding is the existing static asset referenced by the app (LOGO_IMAGE = \"/assets/generated/logo.png\").",
-        "Branding remains responsive and readable on mobile/tablet/desktop (logo scales appropriately and does not overflow)."
+        "The hero branding area does not display any brand-name text (only the logo image is shown).",
+        "The footer does not display the brand name text (e.g., remove/replace the “© {year} Smart Janghai. All rights reserved.” wording so it no longer contains the brand name).",
+        "No other new user-facing text is introduced as a substitute for the removed brand-name text."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/site/BrandLogo.tsx",
-          "operation": "create",
-          "description": "Create a reusable brand logo component that renders the existing LOGO_IMAGE (/assets/generated/logo.png) as the primary mark with responsive sizing controls suitable for hero and footer usage."
+          "path": "frontend/src/components/site/SiteFooter.tsx",
+          "operation": "modify",
+          "description": "Remove the brand-name text from the footer copyright line while keeping the rest of the footer content unchanged (no new substitute brand text)."
         },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Update the hero branding area to use the new BrandLogo component (instead of any text heading) while keeping the logo as the primary brand mark and ensuring responsive sizing matches the current design intent."
-        },
-        {
-          "path": "frontend/src/components/site/SiteFooter.tsx",
-          "operation": "modify",
-          "description": "Replace the visible \"SMART JANGHAI\" footer branding text heading with the BrandLogo component, keeping the tagline and other footer content intact and ensuring the logo scales appropriately without overflow."
+          "description": "Remove/avoid any user-visible brand-name text in the hero branding area by ensuring hero image alt text does not contain the brand name (so broken-image fallback text never shows the brand). Also remove the visible brand-name words from the CTA title without introducing new substitute text."
         }
       ]
     },
     {
-      "id": "REQ-19",
-      "summary": "Ensure only one visible hero branding mark at a time and preserve graceful rendering if the logo asset fails to load.",
+      "id": "REQ-21",
+      "summary": "Update BrandLogo so image load failure uses a non-text placeholder fallback that preserves layout.",
       "acceptanceCriteria": [
-        "Only one logo image is visible in the hero branding area (no duplicate logos).",
-        "If the logo image fails to load, the page still renders without runtime errors and without a blank screen (graceful fallback behavior is preserved)."
+        "If the logo image path is invalid or the image fails to load, the component renders a simple non-text placeholder (e.g., a neutral shape/container) and the page remains fully rendered.",
+        "The fallback does not contain “SMART JANGHAI” or “Smart Janghai” text."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/site/BrandLogo.tsx",
-          "operation": "create",
-          "description": "Implement a resilient image loading pattern inside BrandLogo: show exactly one visible branding mark at a time (image or fallback) and provide a non-blank, non-crashing visual fallback when the logo fails to load."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Remove any ad-hoc logo error state/rendering in the hero and rely on BrandLogo so the hero never shows duplicate marks and maintains graceful fallback behavior if the asset fails to load."
-        },
-        {
-          "path": "frontend/src/components/site/SiteFooter.tsx",
-          "operation": "modify",
-          "description": "Use BrandLogo for footer branding so missing logo assets do not create an empty/blank branding area and the footer continues to render safely."
+          "description": "Replace the current text fallback with a non-text visual placeholder (e.g., neutral rounded container/skeleton) that matches the selected size height to preserve layout and maintains the resilient image-loading behavior; also ensure the rendered image metadata (alt/labels) does not include the brand name to avoid showing it on image failure."
         }
       ]
     }

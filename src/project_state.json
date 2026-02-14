@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
+  "projectStateVersion": 19,
   "summary": "Build an informational website named “Smart Janghai,” including a modern homepage with a hero image featuring the brand name.",
   "architectural_notes": [
     "Homepage hero image must reference the exact web-safe filename under /public/assets/generated; keep code path in sync with the actual asset name.",
@@ -156,6 +156,22 @@
       "title": "Ensure there is only one visible branding logo mark in the hero/branding area at a time and that missing logo assets never cause a blank section or blank page (use the existing resilient image loading pattern).",
       "reqIds": [
         "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-any-visible-smart-janghai-smart-janghai-branding-text-from-the-ui-so-the-site-branding-is-logo-only-no-brand-name-text-shown-in-the-hero-branding-area-or-footer",
+      "title": "Remove any visible “SMART JANGHAI” / “Smart Janghai” branding text from the UI so the site branding is logo-only (no brand-name text shown in the hero branding area or footer).",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-brandlogo-component-so-that-if-the-logo-image-fails-to-load-it-does-not-fall-back-to-showing-the-brand-name-text-instead-render-a-non-text-fallback-that-preserves-layout-and-does-not-cause-a-blank-empty-page",
+      "title": "Update the BrandLogo component so that if the logo image fails to load, it does not fall back to showing the brand-name text; instead render a non-text fallback that preserves layout and does not cause a blank/empty page.",
+      "reqIds": [
+        "REQ-21"
       ],
       "version": 1
     }

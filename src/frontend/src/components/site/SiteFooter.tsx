@@ -38,7 +38,7 @@ export default function SiteFooter() {
           <Separator className="w-24" />
           
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>© {currentYear} Smart Janghai. All rights reserved.</span>
+            <span>© {currentYear}. All rights reserved.</span>
           </div>
           
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">

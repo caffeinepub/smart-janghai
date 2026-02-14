@@ -1,11 +1,19 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T11:40:24.083Z",
-  "summary": "The diff implements a reusable BrandLogo component that renders the existing logo asset with responsive sizing and an onError fallback, and updates both the HomePage hero and the SiteFooter branding area to use this logo component instead of a visible \"SMART JANGHAI\" heading. The hero also maintains resilient background image loading.",
+  "generatedAt": "2026-02-14T11:45:08.720Z",
+  "summary": "REQ-20 and REQ-21 appear implemented: hero branding is logo-only, footer copyright no longer contains “Smart Janghai”, and BrandLogo now uses a non-text placeholder on image load failure. However, the diff also introduces additional footer user-facing content (Support section and caffeine.ai attribution) that was not requested and may violate the “do not rewrite beyond removing brand-name text” non-goal.",
   "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.72,
+  "hallucinated_features": [
+    {
+      "description": "Added/expanded footer content beyond removing the brand name (e.g., “Your trusted information hub”, “Support” section with email, and “Built with … caffeine.ai” attribution link with UTM parameters).",
+      "reason": "BuildRequest only asks to remove visible “Smart Janghai” branding text and adjust logo fallback behavior; it explicitly states not to redesign the homepage layout or rewrite non-branding informational copy beyond removing brand-name text.",
+      "evidence": [
+        "frontend/src/components/site/SiteFooter.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/components/site/BrandLogo.tsx",

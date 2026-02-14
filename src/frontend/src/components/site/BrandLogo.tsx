@@ -16,19 +16,20 @@ export default function BrandLogo({ size = 'md', className = '' }: BrandLogoProp
     xl: 'h-24 md:h-32 lg:h-40',
   };
 
-  // Graceful fallback if image fails to load
+  // Non-text placeholder fallback if image fails to load
   if (imageError) {
     return (
-      <div className={`flex items-center justify-center ${className}`}>
-        <span className="text-lg md:text-xl font-bold text-primary">SMART JANGHAI</span>
-      </div>
+      <div 
+        className={`${sizeClasses[size]} aspect-[3/1] rounded-lg bg-primary/20 border-2 border-primary/30 ${className}`}
+        aria-label="Logo"
+      />
     );
   }
 
   return (
     <img
       src={LOGO_IMAGE}
-      alt="Smart Janghai"
+      alt="Logo"
       className={`${sizeClasses[size]} w-auto object-contain ${className}`}
       onError={() => setImageError(true)}
     />

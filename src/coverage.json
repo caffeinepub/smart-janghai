@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T11:40:24.085Z",
+  "generatedAt": "2026-02-14T11:45:08.723Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -11,33 +11,27 @@
     "implemented": 2,
     "items": [
       {
-        "id": "REQ-18",
-        "summary": "Replace the visible \"SMART JANGHAI\" brand-name text used for branding on the site with the existing logo image asset, so the logo image is used as the primary branding mark instead of the text.",
+        "id": "REQ-20",
+        "summary": "Remove any visible “SMART JANGHAI” / “Smart Janghai” branding text from the UI so the site branding is logo-only (no brand-name text shown in the hero branding area or footer).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/site/BrandLogo.tsx",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/site/SiteFooter.tsx"
+          "frontend/src/components/site/SiteFooter.tsx",
+          "frontend/src/pages/HomePage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/site/BrandLogo.tsx",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/site/SiteFooter.tsx"
+          "frontend/src/components/site/SiteFooter.tsx",
+          "frontend/src/pages/HomePage.tsx"
         ]
       },
       {
-        "id": "REQ-19",
-        "summary": "Ensure there is only one visible branding logo mark in the hero/branding area at a time and that missing logo assets never cause a blank section or blank page (use the existing resilient image loading pattern).",
+        "id": "REQ-21",
+        "summary": "Update the BrandLogo component so that if the logo image fails to load, it does not fall back to showing the brand-name text; instead render a non-text fallback that preserves layout and does not cause a blank/empty page.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/site/BrandLogo.tsx",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/site/SiteFooter.tsx"
+          "frontend/src/components/site/BrandLogo.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/site/BrandLogo.tsx",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/site/SiteFooter.tsx"
+          "frontend/src/components/site/BrandLogo.tsx"
         ]
       }
     ]

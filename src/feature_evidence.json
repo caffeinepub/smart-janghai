@@ -2,10 +2,9 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-replace-the-visible-smart-janghai-brand-name-text-used-for-branding-on-the-site-with-the-existing-logo-image-asset-so-the-logo-image-is-used-as-the-primary-branding-mark-instead-of-the-text",
-      "featureTitle": "Replace the visible \"SMART JANGHAI\" brand-name text used for branding on the site with the existing logo image asset, so the logo image is used as the primary branding mark instead of the text.",
+      "featureId": "feature-remove-any-visible-smart-janghai-smart-janghai-branding-text-from-the-ui-so-the-site-branding-is-logo-only-no-brand-name-text-shown-in-the-hero-branding-area-or-footer",
+      "featureTitle": "Remove any visible “SMART JANGHAI” / “Smart Janghai” branding text from the UI so the site branding is logo-only (no brand-name text shown in the hero branding area or footer).",
       "files": [
-        "frontend/src/components/site/BrandLogo.tsx",
         "frontend/src/components/site/SiteFooter.tsx",
         "frontend/src/pages/HomePage.tsx"
       ],
@@ -17,17 +16,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-18"
+        "REQ-20"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-there-is-only-one-visible-branding-logo-mark-in-the-hero-branding-area-at-a-time-and-that-missing-logo-assets-never-cause-a-blank-section-or-blank-page-use-the-existing-resilient-image-loading-pattern",
-      "featureTitle": "Ensure there is only one visible branding logo mark in the hero/branding area at a time and that missing logo assets never cause a blank section or blank page (use the existing resilient image loading pattern).",
+      "featureId": "feature-update-the-brandlogo-component-so-that-if-the-logo-image-fails-to-load-it-does-not-fall-back-to-showing-the-brand-name-text-instead-render-a-non-text-fallback-that-preserves-layout-and-does-not-cause-a-blank-empty-page",
+      "featureTitle": "Update the BrandLogo component so that if the logo image fails to load, it does not fall back to showing the brand-name text; instead render a non-text fallback that preserves layout and does not cause a blank/empty page.",
       "files": [
-        "frontend/src/components/site/BrandLogo.tsx",
-        "frontend/src/components/site/SiteFooter.tsx",
-        "frontend/src/pages/HomePage.tsx"
+        "frontend/src/components/site/BrandLogo.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -37,7 +34,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-19"
+        "REQ-21"
       ],
       "confidence": "high"
     }

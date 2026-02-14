@@ -19,7 +19,7 @@ export default function HomePage() {
           {!heroImageError ? (
             <img
               src={HERO_BACKGROUND}
-              alt="Smart Janghai Hero"
+              alt="Hero background"
               className="w-full h-full object-cover"
               onError={() => setHeroImageError(true)}
             />
@@ -56,7 +56,7 @@ export default function HomePage() {
             </h2>
             <Separator className="w-24 mx-auto mb-6 h-1 bg-primary" />
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-              Smart Janghai is dedicated to providing comprehensive, reliable information that drives
+              We are dedicated to providing comprehensive, reliable information that drives
               positive change and fosters growth. We believe in the power of knowledge to transform
               communities and create lasting impact.
             </p>
@@ -185,7 +185,7 @@ export default function HomePage() {
           <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
             <CardHeader className="text-center pb-4">
               <CardTitle className="text-3xl md:text-4xl mb-4">
-                Join the Smart Janghai Community
+                Join Our Community
               </CardTitle>
               <CardDescription className="text-lg max-w-2xl mx-auto">
                 Be part of a growing network of informed individuals committed to making a difference.

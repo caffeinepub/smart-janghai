@@ -1,67 +1,55 @@
 {
   "kind": "build_request",
-  "title": "Replace visible SMART JANGHAI name text with the logo image",
+  "title": "Remove remaining Smart Janghai branding text and rely on logo-only branding",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-18",
-      "text": "Replace the visible \"SMART JANGHAI\" brand-name text used for branding on the site with the existing logo image asset, so the logo image is used as the primary branding mark instead of the text.",
+      "id": "REQ-20",
+      "text": "Remove any visible “SMART JANGHAI” / “Smart Janghai” branding text from the UI so the site branding is logo-only (no brand-name text shown in the hero branding area or footer).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-3"
         ],
         "quotes": [
-          "REPLACE SMART JANGHAI NAME WITH THIS IMAGE FORMATE LOGO"
+          "YES REMOVE TEXT"
         ]
       },
       "acceptanceCriteria": [
-        "The homepage hero continues to display the logo image (not a \"SMART JANGHAI\" text heading) as the primary brand mark.",
-        "The footer branding area no longer renders \"SMART JANGHAI\" as a visible text heading and displays the logo image instead.",
-        "The logo image used for branding is the existing static asset referenced by the app (LOGO_IMAGE = \"/assets/generated/logo.png\").",
-        "Branding remains responsive and readable on mobile/tablet/desktop (logo scales appropriately and does not overflow)."
+        "The hero branding area does not display any brand-name text (only the logo image is shown).",
+        "The footer does not display the brand name text (e.g., remove/replace the “© {year} Smart Janghai. All rights reserved.” wording so it no longer contains the brand name).",
+        "No other new user-facing text is introduced as a substitute for the removed brand-name text."
       ]
     },
     {
-      "id": "REQ-19",
-      "text": "Ensure there is only one visible branding logo mark in the hero/branding area at a time and that missing logo assets never cause a blank section or blank page (use the existing resilient image loading pattern).",
+      "id": "REQ-21",
+      "text": "Update the BrandLogo component so that if the logo image fails to load, it does not fall back to showing the brand-name text; instead render a non-text fallback that preserves layout and does not cause a blank/empty page.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-3"
         ],
         "quotes": [
-          "REPLACE SMART JANGHAI NAME WITH THIS IMAGE FORMATE LOGO"
+          "YES REMOVE TEXT"
         ]
       },
       "acceptanceCriteria": [
-        "Only one logo image is visible in the hero branding area (no duplicate logos).",
-        "If the logo image fails to load, the page still renders without runtime errors and without a blank screen (graceful fallback behavior is preserved)."
+        "If the logo image path is invalid or the image fails to load, the component renders a simple non-text placeholder (e.g., a neutral shape/container) and the page remains fully rendered.",
+        "The fallback does not contain “SMART JANGHAI” or “Smart Janghai” text."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/components/ui (read-only).",
-    "Do not modify immutable hook/entry files: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx.",
-    "Keep image assets served from frontend/public/assets/generated and referenced by exact filename paths (no backend image routing)."
+    "Do not edit any files under frontend immutablePaths (e.g., frontend/src/main.tsx, frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/components/ui).",
+    "Keep the existing resilient image-loading approach so missing assets never cause a blank section or blank page."
   ],
   "nonGoals": [
-    "Creating or generating a new logo image file.",
-    "Changing backend (Motoko) code or adding backend endpoints.",
-    "Adding authentication or any new interactive features beyond the branding swap."
+    "Do not change the hero background image asset or its path.",
+    "Do not redesign the overall homepage layout or rewrite non-branding informational copy beyond removing brand-name text.",
+    "No backend changes."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }
