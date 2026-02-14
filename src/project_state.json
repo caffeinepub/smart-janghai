@@ -1,11 +1,19 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 17,
   "summary": "Build an informational website named “Smart Janghai,” including a modern homepage with a hero image featuring the brand name.",
-  "architectural_notes": [],
-  "known_issues": [],
+  "architectural_notes": [
+    "Homepage hero image must reference the exact web-safe filename under /public/assets/generated; keep code path in sync with the actual asset name.",
+    "If adding images to the logo/branding area, ensure responsive sizing and preserve readability/spacing across common screen sizes.",
+    "Front page branding should show only one logo/mark; avoid duplicating logos across hero/logo section and other areas.",
+    "If the brand name text is replaced by a logo image, ensure accessibility: provide meaningful alt text and preserve layout/readability across breakpoints."
+  ],
+  "known_issues": [
+    "Hero image not displaying due to mismatch between referenced filename (chatgpt-image-feb-14-2026-115631-am-1.png) and actual uploaded asset name (ChatGPT Image Feb 14, 2026, 11_56_31 AM.png).",
+    "Build/deploy failed with a configuration error (\"Please reach out to the Caffeine team\").",
+    "After latest deployment/update, the site appears blank/\"nothing is showing\" (possible build/runtime failure or missing render)."
+  ],
   "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Modern minimal tech-city hero banner with soft neutral gradient, subtle skyline silhouette, and large centered text “SMART JANGHAI” in clean sans-serif (hero-smart-janghai.dim_1920x1080.png)",
   "existing_features": [
     {
       "id": "feature-build-the-public-homepage-for-the-informational-website-named-smart-janghai-including-a-hero-section-that-prominently-displays-the-brand-name-smart-janghai-and-a-short-informational-tagline-plus-a-simple-layout-for-additional-informational-sections-e-g-intro-highlights-footer",
@@ -30,12 +38,176 @@
         "REQ-3"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-homepage-top-hero-section-to-display-the-uploaded-image-behind-the-smart-janghai-logo-text-at-the-top-of-the-front-page-preserving-readability-e-g-via-existing-gradient-overlay-across-common-screen-sizes",
+      "title": "Update the HomePage top (hero) section to display the uploaded image behind the \"SMART JANGHAI\" logo/text at the top of the front page, preserving readability (e.g., via existing gradient overlay) across common screen sizes.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-the-newly-uploaded-image-file-chatgpt-image-feb-14-2026-11-56-31-am-1-png-to-the-frontend-as-a-static-asset-under-frontend-public-assets-generated-using-a-web-safe-filename-and-ensure-the-homepage-hero-references-that-exact-filename",
+      "title": "Add the newly uploaded image file \"ChatGPT Image Feb 14, 2026, 11_56_31 AM-1.png\" to the frontend as a static asset under \"frontend/public/assets/generated\" using a web-safe filename, and ensure the homepage hero references that exact filename.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-top-hero-section-of-the-front-page-displays-the-uploaded-image-behind-the-smart-janghai-logo-text-while-preserving-text-readability-across-common-screen-sizes-mobile-tablet-desktop-using-an-overlay-gradient-if-needed",
+      "title": "Ensure the top (hero) section of the front page displays the uploaded image behind the \"SMART JANGHAI\" logo/text while preserving text readability across common screen sizes (mobile, tablet, desktop), using an overlay/gradient if needed.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-homepage-hero-background-image-so-it-loads-correctly-by-making-the-referenced-src-path-match-the-actual-static-asset-filename-under-frontend-public-assets-generated-specifically-the-user-uploaded-file-chatgpt-image-feb-14-2026-11-56-31-am-png-use-a-web-safe-filename-in-the-generated-assets-folder-and-ensure-frontend-src-pages-homepage-tsx-references-that-exact-web-safe-filename",
+      "title": "Fix the HomePage hero background image so it loads correctly by making the referenced `src` path match the actual static asset filename under `frontend/public/assets/generated`, specifically the user-uploaded file \"ChatGPT Image Feb 14, 2026, 11_56_31 AM.png\" (use a web-safe filename in the generated assets folder and ensure `frontend/src/pages/HomePage.tsx` references that exact web-safe filename).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-the-user-uploaded-image-file-chatgpt-image-feb-14-2026-12-12-09-pm-png-to-the-frontend-as-a-static-asset-under-frontend-public-assets-generated-using-a-web-safe-filename-and-ensure-the-app-references-that-exact-filename",
+      "title": "Add the user-uploaded image file \"ChatGPT Image Feb 14, 2026, 12_12_09 PM.png\" to the frontend as a static asset under \"frontend/public/assets/generated\" using a web-safe filename, and ensure the app references that exact filename.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-homepage-hero-logo-section-the-branding-area-in-the-hero-content-to-display-the-uploaded-image-from-req-9-alongside-above-the-smart-janghai-text-while-preserving-readability-and-responsive-layout-mobile-tablet-desktop",
+      "title": "Update the HomePage hero \"logo section\" (the branding area in the hero content) to display the uploaded image (from REQ-9) alongside/above the \"SMART JANGHAI\" text while preserving readability and responsive layout (mobile/tablet/desktop).",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-frontend-so-the-smart-janghai-site-reliably-renders-content-again-no-blank-page-after-deployment",
+      "title": "Fix the frontend so the Smart Janghai site reliably renders content again (no blank page) after deployment.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-duplicate-react-query-provider-setup-so-the-app-uses-exactly-one-queryclientprovider-keep-the-provider-in-frontend-src-main-tsx-and-update-frontend-src-app-tsx-accordingly",
+      "title": "Remove the duplicate React Query provider setup so the app uses exactly one QueryClientProvider (keep the provider in frontend/src/main.tsx and update frontend/src/App.tsx accordingly).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-user-visible-error-fallback-for-unexpected-render-runtime-errors-so-the-page-never-appears-completely-blank-e-g-an-error-boundary-around-the-app-that-displays-a-simple-english-error-message-and-a-refresh-action",
+      "title": "Add a user-visible error fallback for unexpected render/runtime errors so the page never appears completely blank (e.g., an Error Boundary around the app that displays a simple English error message and a refresh action).",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-the-hero-and-logo-static-image-asset-paths-are-valid-and-do-not-break-page-rendering-ensure-frontend-src-assets-generatedassets-ts-references-files-that-exist-under-frontend-public-assets-generated-and-make-image-loading-resilient-do-not-let-missing-images-blank-the-page",
+      "title": "Verify the hero and logo static image asset paths are valid and do not break page rendering; ensure frontend/src/assets/generatedAssets.ts references files that exist under frontend/public/assets/generated, and make image loading resilient (do not let missing images blank the page).",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-the-user-uploaded-image-file-logo-png-to-the-frontend-as-a-static-asset-under-frontend-public-assets-generated-using-a-web-safe-filename-and-update-the-code-to-reference-that-exact-filename-for-the-site-logo",
+      "title": "Add the user-uploaded image file \"LOGO.png\" to the frontend as a static asset under \"frontend/public/assets/generated\" using a web-safe filename, and update the code to reference that exact filename for the site logo.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-homepage-hero-branding-area-so-the-front-page-displays-only-one-logo-branding-mark-no-multiple-logos-use-the-uploaded-logo-image-as-the-single-logo-displayed-in-the-hero-and-remove-avoid-any-additional-logo-images-so-only-one-logo-is-shown",
+      "title": "Update the homepage hero branding area so the front page displays only one logo/branding mark (no multiple logos). Use the uploaded logo image as the single logo displayed in the hero, and remove/avoid any additional logo images so only one logo is shown.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-support-section-at-the-bottom-of-the-website-in-the-footer-area-that-displays-the-contact-email-address-smartcare01-gmail-com-in-english-as-a-clickable-mailto-link",
+      "title": "Add a Support section at the bottom of the website (in the footer area) that displays the contact email address \"SMARTCARE01@GMAIL.COM\" in English, as a clickable mailto link.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-visible-smart-janghai-brand-name-text-used-for-branding-on-the-site-with-the-existing-logo-image-asset-so-the-logo-image-is-used-as-the-primary-branding-mark-instead-of-the-text",
+      "title": "Replace the visible \"SMART JANGHAI\" brand-name text used for branding on the site with the existing logo image asset, so the logo image is used as the primary branding mark instead of the text.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-there-is-only-one-visible-branding-logo-mark-in-the-hero-branding-area-at-a-time-and-that-missing-logo-assets-never-cause-a-blank-section-or-blank-page-use-the-existing-resilient-image-loading-pattern",
+      "title": "Ensure there is only one visible branding logo mark in the hero/branding area at a time and that missing logo assets never cause a blank section or blank page (use the existing resilient image loading pattern).",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
     {
       "id": "AR-1",
       "summary": "Generate a modern homepage hero image concept for the Smart Janghai informational website with the brand name overlaid.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Place the provided/generated hero image behind the “SMART JANGHAI” logo/text in the top (hero) section of the front page.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add the user-uploaded image file \"ChatGPT Image Feb 14, 2026, 11_56_31 AM.png\" to the frontend as a static asset under frontend/public/assets/generated, using a web-safe filename, and ensure it is referenced consistently from the homepage hero.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Add the provided images as a sliding notification panel on the front page.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Add the provided image to the logo section of the front page (alongside/within the SMART JANGHAI branding area).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Ensure the front page displays only one logo/branding mark (remove/avoid multiple logos in the hero/branding area).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Add a Support section at the bottom of the homepage/footer area including the contact email SMARTCARE01@GMAIL.COM.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Replace the \"SMART JANGHAI\" brand name text in the hero/header branding area with the provided image-format logo (use the logo image in place of the text).",
       "reqIds": [],
       "status": "pending"
     }

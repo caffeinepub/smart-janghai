@@ -1,12 +1,10 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import HomePage from './pages/HomePage';
-
-const queryClient = new QueryClient();
+import AppErrorBoundary from './components/app/AppErrorBoundary';
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <AppErrorBoundary>
       <HomePage />
-    </QueryClientProvider>
+    </AppErrorBoundary>
   );
 }

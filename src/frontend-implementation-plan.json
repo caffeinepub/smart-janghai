@@ -1,89 +1,57 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Smart Janghai informational homepage with branded hero image",
+  "title": "Swap SMART JANGHAI text branding to logo image with resilient fallback",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Implement the Smart Janghai public homepage with hero (brand + tagline) and additional informational sections.",
+      "id": "REQ-18",
+      "summary": "Replace visible SMART JANGHAI branding text in the UI with the existing logo image asset as the primary brand mark (hero + footer).",
       "acceptanceCriteria": [
-        "Homepage renders without errors and shows the brand name text exactly as “SMART JANGHAI”.",
-        "Hero section includes a short English tagline beneath the brand name.",
-        "Page includes at least two additional informational sections below the hero (content can be placeholder English text).",
-        "All user-facing text is in English."
+        "The homepage hero continues to display the logo image (not a \"SMART JANGHAI\" text heading) as the primary brand mark.",
+        "The footer branding area no longer renders \"SMART JANGHAI\" as a visible text heading and displays the logo image instead.",
+        "The logo image used for branding is the existing static asset referenced by the app (LOGO_IMAGE = \"/assets/generated/logo.png\").",
+        "Branding remains responsive and readable on mobile/tablet/desktop (logo scales appropriately and does not overflow)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/HomePage.tsx",
+          "path": "frontend/src/components/site/BrandLogo.tsx",
           "operation": "create",
-          "description": "Create the Smart Janghai homepage view with a hero section (brand name “SMART JANGHAI” + short English tagline) and at least two additional informational sections (e.g., Intro and Highlights) plus a simple footer. Use shadcn-ui components (e.g., Card, Separator) to structure sections; verify the component's usage instructions before implementing."
+          "description": "Create a reusable brand logo component that renders the existing LOGO_IMAGE (/assets/generated/logo.png) as the primary mark with responsive sizing controls suitable for hero and footer usage."
         },
         {
-          "path": "frontend/src/components/site/SiteLayout.tsx",
-          "operation": "create",
-          "description": "Create a simple public site layout wrapper (header/container/footer slots) to keep spacing and typography consistent across the homepage. Use shadcn-ui components (e.g., Separator) where appropriate; verify the component's usage instructions before implementing."
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Update the hero branding area to use the new BrandLogo component (instead of any text heading) while keeping the logo as the primary brand mark and ensuring responsive sizing matches the current design intent."
         },
         {
           "path": "frontend/src/components/site/SiteFooter.tsx",
-          "operation": "create",
-          "description": "Create a minimal informational footer component (English-only text) used by the homepage."
-        },
-        {
-          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire the new HomePage into the app so it becomes the public homepage view (no additional routes/pages beyond what is required). Ensure the homepage renders by default without requiring authentication."
+          "description": "Replace the visible \"SMART JANGHAI\" footer branding text heading with the BrandLogo component, keeping the tagline and other footer content intact and ensuring the logo scales appropriately without overflow."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "Add the generated hero image as a static asset and use it as the primary visual in the homepage hero with readable overlay text.",
+      "id": "REQ-19",
+      "summary": "Ensure only one visible hero branding mark at a time and preserve graceful rendering if the logo asset fails to load.",
       "acceptanceCriteria": [
-        "The generated image file is present under frontend/public/assets/generated with the exact required filename.",
-        "Homepage hero visually uses the generated image (as an <img> or CSS background) and remains readable (brand name and tagline have sufficient contrast).",
-        "No backend calls are used to serve or fetch the image."
+        "Only one logo image is visible in the hero branding area (no duplicate logos).",
+        "If the logo image fails to load, the page still renders without runtime errors and without a blank screen (graceful fallback behavior is preserved)."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/assets/generated/hero-smart-janghai.dim_1920x1080.png",
+          "path": "frontend/src/components/site/BrandLogo.tsx",
           "operation": "create",
-          "description": "Add the generated image asset exactly as required: frontend/public/assets/generated/hero-smart-janghai.dim_1920x1080.png."
+          "description": "Implement a resilient image loading pattern inside BrandLogo: show exactly one visible branding mark at a time (image or fallback) and provide a non-blank, non-crashing visual fallback when the logo fails to load."
         },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Update the hero to use the static image at frontend/public/assets/generated/hero-smart-janghai.dim_1920x1080.png as the hero background/primary visual, and add an overlay/scrim and text styling to ensure the brand name and tagline remain readable with sufficient contrast (no backend fetch)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Apply a cohesive, modern non-blue-and-purple-dominant theme and ensure responsive layout across the homepage.",
-      "acceptanceCriteria": [
-        "Theme is consistent across hero, sections, and footer (typography scale, spacing, and component styling feel unified).",
-        "Primary palette is not dominated by blue & purple together (choose an alternative modern palette).",
-        "Layout is responsive for mobile and desktop (no overlapping text in hero)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Adjust global theme tokens/variables and base typography to a cohesive modern palette that is not dominated by blue & purple together (e.g., neutral + emerald/teal accent, or neutral + warm amber accent). Keep changes consistent with Tailwind/shadcn-ui token usage and ensure readable contrast."
+          "description": "Remove any ad-hoc logo error state/rendering in the hero and rely on BrandLogo so the hero never shows duplicate marks and maintains graceful fallback behavior if the asset fails to load."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/components/site/SiteFooter.tsx",
           "operation": "modify",
-          "description": "Update/extend Tailwind theme configuration as needed to support the chosen non-blue-and-purple-dominant palette and consistent typography/spacing utilities (without modifying any files under frontend/src/components/ui)."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Refine responsive layout (mobile-to-desktop) for hero and sections: ensure no overlapping hero text, consistent spacing, and unified component styling. Use shadcn-ui components for consistent UI primitives where helpful; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/site/SiteLayout.tsx",
-          "operation": "modify",
-          "description": "Ensure the shared layout applies consistent container widths, vertical rhythm, and typography across hero/sections/footer for a unified theme."
+          "description": "Use BrandLogo for footer branding so missing logo assets do not create an empty/blank branding area and the footer continues to render safely."
         }
       ]
     }

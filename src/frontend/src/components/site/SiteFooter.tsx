@@ -1,5 +1,6 @@
 import { Separator } from '@/components/ui/separator';
-import { Heart } from 'lucide-react';
+import { Heart, Mail } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 
 export default function SiteFooter() {
   const currentYear = new Date().getFullYear();
@@ -12,12 +13,26 @@ export default function SiteFooter() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col items-center gap-4">
           <div className="text-center">
-            <p className="text-sm font-semibold text-foreground mb-1">
-              SMART JANGHAI
-            </p>
+            <div className="flex justify-center mb-2">
+              <BrandLogo size="sm" />
+            </div>
             <p className="text-xs text-muted-foreground">
               Your trusted information hub
             </p>
+          </div>
+          
+          <Separator className="w-24" />
+          
+          {/* Support Section */}
+          <div className="text-center">
+            <p className="text-sm font-semibold text-foreground mb-2">Support</p>
+            <a
+              href="mailto:SMARTCARE01@GMAIL.COM"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+            >
+              <Mail className="w-4 h-4" />
+              <span>SMARTCARE01@GMAIL.COM</span>
+            </a>
           </div>
           
           <Separator className="w-24" />

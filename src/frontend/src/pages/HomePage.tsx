@@ -1,21 +1,31 @@
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import SiteLayout from '@/components/site/SiteLayout';
+import BrandLogo from '@/components/site/BrandLogo';
 import { Lightbulb, Target, Users, Zap } from 'lucide-react';
+import { HERO_BACKGROUND } from '@/assets/generatedAssets';
 
 export default function HomePage() {
+  const [heroImageError, setHeroImageError] = useState(false);
+
   return (
     <SiteLayout>
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         {/* Hero Background Image */}
         <div className="absolute inset-0 z-0">
-          <img
-            src="/assets/generated/hero-smart-janghai.dim_1920x1080.png"
-            alt="Smart Janghai Hero"
-            className="w-full h-full object-cover"
-          />
+          {!heroImageError ? (
+            <img
+              src={HERO_BACKGROUND}
+              alt="Smart Janghai Hero"
+              className="w-full h-full object-cover"
+              onError={() => setHeroImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-background" />
+          )}
           {/* Overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-background" />
         </div>
@@ -25,9 +35,12 @@ export default function HomePage() {
           <Badge variant="outline" className="mb-6 border-primary/30 bg-primary/10 text-primary-foreground backdrop-blur-sm">
             Welcome to the Future
           </Badge>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 text-white drop-shadow-2xl">
-            SMART JANGHAI
-          </h1>
+          
+          {/* Brand Logo */}
+          <div className="flex justify-center mb-8">
+            <BrandLogo size="lg" className="drop-shadow-2xl" />
+          </div>
+
           <p className="text-xl md:text-2xl lg:text-3xl text-white/90 max-w-3xl mx-auto font-light tracking-wide drop-shadow-lg">
             Your trusted information hub for innovation and progress
           </p>

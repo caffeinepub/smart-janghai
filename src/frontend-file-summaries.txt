@@ -1,9 +1,12 @@
 {
-  "frontend/src/App.tsx": "Main application entry point that wraps the HomePage component with QueryClientProvider for future data fetching needs.",
-  "frontend/src/pages/HomePage.tsx": "Complete Smart Janghai homepage featuring a hero section with the generated background image, brand name \"SMART JANGHAI\", tagline, feature cards, informational highlights, and call-to-action section.",
+  "frontend/src/App.tsx": "Minimal root application component that wraps HomePage with AppErrorBoundary for error handling; relies on QueryClientProvider from main.tsx (no duplicate providers).",
+  "frontend/src/pages/HomePage.tsx": "Complete Smart Janghai homepage with hero section displaying the BrandLogo component, feature cards, informational highlights, and call-to-action section with resilient image loading for the hero background.",
   "frontend/src/components/site/SiteLayout.tsx": "Reusable layout wrapper component that provides consistent structure with main content area and footer across the site.",
-  "frontend/src/components/site/SiteFooter.tsx": "Site footer component displaying copyright, branding, and attribution link to caffeine.ai with proper UTM tracking parameters.",
+  "frontend/src/components/site/SiteFooter.tsx": "Site footer component displaying the BrandLogo component instead of text branding, along with copyright, Support section with clickable mailto link, and attribution link to caffeine.ai with proper UTM tracking parameters.",
   "frontend/src/index.css": "Global styles with OKLCH color system featuring an emerald/teal primary palette with warm neutral tones, avoiding blue-purple aesthetics, supporting both light and dark modes.",
   "frontend/tailwind.config.js": "Tailwind configuration extended with custom emerald/teal color tokens, Inter font family, and consistent spacing/radius utilities for the Smart Janghai design system.",
-  "frontend/src/hooks/useQueries.ts": "Placeholder file for future React Query hooks when backend data fetching is needed."
+  "frontend/src/hooks/useQueries.ts": "Placeholder file for future React Query hooks when backend data fetching is needed.",
+  "frontend/src/assets/generatedAssets.ts": "Centralized constants file exporting web-safe paths for generated static assets, updated to reference the new logo.png file and the existing hero background image.",
+  "frontend/src/components/app/AppErrorBoundary.tsx": "React Error Boundary component that catches render-time errors and displays a user-friendly fallback UI with a reload button instead of allowing blank screens.",
+  "frontend/src/components/site/BrandLogo.tsx": "Reusable brand logo component that renders the LOGO_IMAGE with responsive sizing options (sm/md/lg/xl) and graceful text fallback if the image fails to load."
 }

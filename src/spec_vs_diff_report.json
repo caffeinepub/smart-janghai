@@ -1,53 +1,16 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T07:16:14.827Z",
-  "summary": "Homepage and theme scaffolding were added (HomePage with hero/sections, Tailwind theme, layout/footer). However, the required generated hero image asset is not evidenced in the diff, and Internet Identity/auth-related functionality was added despite being a stated non-goal.",
-  "missing_requirements": [
-    {
-      "id": "REQ-2",
-      "requirement": "Add and display a generated homepage hero image as a static frontend asset stored under frontend/public/assets/generated with the exact filename hero-smart-janghai.dim_1920x1080.png.",
-      "reason": "The homepage references the image path, but the diff does not show the actual image file being added under frontend/public/assets/generated, so the acceptance criterion that the file is present is not met based on provided evidence.",
-      "evidence": [
-        "frontend/src/pages/HomePage.tsx"
-      ]
-    }
-  ],
-  "hallucinated_features": [
-    {
-      "description": "Internet Identity authentication provider/hook wiring and actor creation logic that depends on user identity.",
-      "reason": "The BuildRequest explicitly states no user accounts/authentication flows (including Internet Identity) unless requested later, but the diff adds Internet Identity context/provider and uses it in hooks and app bootstrap.",
-      "evidence": [
-        "frontend/src/main.tsx",
-        "frontend/src/hooks/useInternetIdentity.ts",
-        "frontend/src/hooks/useActor.ts"
-      ]
-    },
-    {
-      "description": "Footer attribution/marketing link to caffeine.ai with UTM parameters.",
-      "reason": "Not requested by the BuildRequest and adds external link/attribution content beyond the informational site requirements.",
-      "evidence": [
-        "frontend/src/components/site/SiteFooter.tsx"
-      ]
-    }
-  ],
-  "confidence": 0.74,
+  "generatedAt": "2026-02-14T11:40:24.083Z",
+  "summary": "The diff implements a reusable BrandLogo component that renders the existing logo asset with responsive sizing and an onError fallback, and updates both the HomePage hero and the SiteFooter branding area to use this logo component instead of a visible \"SMART JANGHAI\" heading. The hero also maintains resilient background image loading.",
+  "missing_requirements": [],
+  "hallucinated_features": [],
+  "confidence": 0.72,
   "changed_files": [
-    "all_files_summary.json",
-    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
+    "frontend/src/components/site/BrandLogo.tsx",
     "frontend/src/components/site/SiteFooter.tsx",
-    "frontend/src/components/site/SiteLayout.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/main.tsx",
     "frontend/src/pages/HomePage.tsx",
-    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

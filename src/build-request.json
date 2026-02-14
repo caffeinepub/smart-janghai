@@ -1,82 +1,67 @@
 {
   "kind": "build_request",
-  "title": "Create Smart Janghai informational homepage with branded hero image",
+  "title": "Replace visible SMART JANGHAI name text with the logo image",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Build the public homepage for the informational website named “Smart Janghai”, including a hero section that prominently displays the brand name “SMART JANGHAI” and a short informational tagline, plus a simple layout for additional informational sections (e.g., intro, highlights, footer).",
+      "id": "REQ-18",
+      "text": "Replace the visible \"SMART JANGHAI\" brand-name text used for branding on the site with the existing logo image asset, so the logo image is used as the primary branding mark instead of the text.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2",
-          "msg-3"
+          "msg-4"
         ],
         "quotes": [
-          "I WANT TO CREAT A WEBSITE THAT NAME IS SMART JANGHAI ... THIS WEBSITE IS COMPLETLY INFORMATIONAL WEBSITE",
-          "OK DO IT"
+          "REPLACE SMART JANGHAI NAME WITH THIS IMAGE FORMATE LOGO"
         ]
       },
       "acceptanceCriteria": [
-        "Homepage renders without errors and shows the brand name text exactly as “SMART JANGHAI”.",
-        "Hero section includes a short English tagline beneath the brand name.",
-        "Page includes at least two additional informational sections below the hero (content can be placeholder English text).",
-        "All user-facing text is in English."
+        "The homepage hero continues to display the logo image (not a \"SMART JANGHAI\" text heading) as the primary brand mark.",
+        "The footer branding area no longer renders \"SMART JANGHAI\" as a visible text heading and displays the logo image instead.",
+        "The logo image used for branding is the existing static asset referenced by the app (LOGO_IMAGE = \"/assets/generated/logo.png\").",
+        "Branding remains responsive and readable on mobile/tablet/desktop (logo scales appropriately and does not overflow)."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Add and display a generated homepage hero image as a static frontend asset, stored under frontend/public/assets/generated, and use it as the hero background/primary visual on the homepage.",
+      "id": "REQ-19",
+      "text": "Ensure there is only one visible branding logo mark in the hero/branding area at a time and that missing logo assets never cause a blank section or blank page (use the existing resilient image loading pattern).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2",
-          "msg-3"
+          "msg-4"
         ],
         "quotes": [
-          "CAN YOU SUGGEST BEST STYLE HOMEPAGE IMAGE WITH BRAND NAME SMART JANGHAI",
-          "OK DO IT"
+          "REPLACE SMART JANGHAI NAME WITH THIS IMAGE FORMATE LOGO"
         ]
       },
       "acceptanceCriteria": [
-        "The generated image file is present under frontend/public/assets/generated with the exact required filename.",
-        "Homepage hero visually uses the generated image (as an <img> or CSS background) and remains readable (brand name and tagline have sufficient contrast).",
-        "No backend calls are used to serve or fetch the image."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Apply a cohesive, modern visual theme for the Smart Janghai informational site (colors, typography, spacing, and components) and enforce it consistently across the homepage. Do not use a blue-and-purple dominant palette.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-3"
-        ],
-        "quotes": [
-          "OK DO IT"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Theme is consistent across hero, sections, and footer (typography scale, spacing, and component styling feel unified).",
-        "Primary palette is not dominated by blue & purple together (choose an alternative modern palette).",
-        "Layout is responsive for mobile and desktop (no overlapping text in hero)."
+        "Only one logo image is visible in the hero branding area (no duplicate logos).",
+        "If the logo image fails to load, the page still renders without runtime errors and without a blank screen (graceful fallback behavior is preserved)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor (no multi-service architecture).",
-    "Do not modify any files under frontend/src/components/ui or any other frontend immutable paths listed in SYSTEM_CONTEXT; compose those components instead.",
-    "Store generated images as static assets under frontend/public/assets/generated; do not route images through the backend."
+    "Do not modify files under frontend/src/components/ui (read-only).",
+    "Do not modify immutable hook/entry files: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx.",
+    "Keep image assets served from frontend/public/assets/generated and referenced by exact filename paths (no backend image routing)."
   ],
   "nonGoals": [
-    "No user accounts or authentication flows (including Internet Identity) unless explicitly requested later.",
-    "No admin/CMS editing interface for informational content.",
-    "No third-party API integrations, analytics, or email capture forms."
+    "Creating or generating a new logo image file.",
+    "Changing backend (Motoko) code or adding backend endpoints.",
+    "Adding authentication or any new interactive features beyond the branding swap."
   ],
   "imageRequirements": {
-    "required": [
-      "Modern minimal tech-city hero banner with soft neutral gradient, subtle skyline silhouette, and large centered text “SMART JANGHAI” in clean sans-serif (hero-smart-janghai.dim_1920x1080.png)"
-    ],
+    "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }
