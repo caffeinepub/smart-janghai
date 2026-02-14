@@ -1,0 +1,65 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-build-the-public-homepage-for-the-informational-website-named-smart-janghai-including-a-hero-section-that-prominently-displays-the-brand-name-smart-janghai-and-a-short-informational-tagline-plus-a-simple-layout-for-additional-informational-sections-e-g-intro-highlights-footer",
+      "featureTitle": "Build the public homepage for the informational website named “Smart Janghai”, including a hero section that prominently displays the brand name “SMART JANGHAI” and a short informational tagline, plus a simple layout for additional informational sections (e.g., intro, highlights, footer).",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/site/SiteFooter.tsx",
+        "frontend/src/components/site/SiteLayout.tsx",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-and-display-a-generated-homepage-hero-image-as-a-static-frontend-asset-stored-under-frontend-public-assets-generated-and-use-it-as-the-hero-background-primary-visual-on-the-homepage",
+      "featureTitle": "Add and display a generated homepage hero image as a static frontend asset, stored under frontend/public/assets/generated, and use it as the hero background/primary visual on the homepage.",
+      "files": [
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-cohesive-modern-visual-theme-for-the-smart-janghai-informational-site-colors-typography-spacing-and-components-and-enforce-it-consistently-across-the-homepage-do-not-use-a-blue-and-purple-dominant-palette",
+      "featureTitle": "Apply a cohesive, modern visual theme for the Smart Janghai informational site (colors, typography, spacing, and components) and enforce it consistently across the homepage. Do not use a blue-and-purple dominant palette.",
+      "files": [
+        "frontend/src/components/site/SiteLayout.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/HomePage.tsx",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

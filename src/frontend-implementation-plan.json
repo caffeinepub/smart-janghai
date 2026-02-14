@@ -1,0 +1,91 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Smart Janghai informational homepage with branded hero image",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Implement the Smart Janghai public homepage with hero (brand + tagline) and additional informational sections.",
+      "acceptanceCriteria": [
+        "Homepage renders without errors and shows the brand name text exactly as “SMART JANGHAI”.",
+        "Hero section includes a short English tagline beneath the brand name.",
+        "Page includes at least two additional informational sections below the hero (content can be placeholder English text).",
+        "All user-facing text is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "create",
+          "description": "Create the Smart Janghai homepage view with a hero section (brand name “SMART JANGHAI” + short English tagline) and at least two additional informational sections (e.g., Intro and Highlights) plus a simple footer. Use shadcn-ui components (e.g., Card, Separator) to structure sections; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/site/SiteLayout.tsx",
+          "operation": "create",
+          "description": "Create a simple public site layout wrapper (header/container/footer slots) to keep spacing and typography consistent across the homepage. Use shadcn-ui components (e.g., Separator) where appropriate; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/site/SiteFooter.tsx",
+          "operation": "create",
+          "description": "Create a minimal informational footer component (English-only text) used by the homepage."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the new HomePage into the app so it becomes the public homepage view (no additional routes/pages beyond what is required). Ensure the homepage renders by default without requiring authentication."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Add the generated hero image as a static asset and use it as the primary visual in the homepage hero with readable overlay text.",
+      "acceptanceCriteria": [
+        "The generated image file is present under frontend/public/assets/generated with the exact required filename.",
+        "Homepage hero visually uses the generated image (as an <img> or CSS background) and remains readable (brand name and tagline have sufficient contrast).",
+        "No backend calls are used to serve or fetch the image."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/hero-smart-janghai.dim_1920x1080.png",
+          "operation": "create",
+          "description": "Add the generated image asset exactly as required: frontend/public/assets/generated/hero-smart-janghai.dim_1920x1080.png."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Update the hero to use the static image at frontend/public/assets/generated/hero-smart-janghai.dim_1920x1080.png as the hero background/primary visual, and add an overlay/scrim and text styling to ensure the brand name and tagline remain readable with sufficient contrast (no backend fetch)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Apply a cohesive, modern non-blue-and-purple-dominant theme and ensure responsive layout across the homepage.",
+      "acceptanceCriteria": [
+        "Theme is consistent across hero, sections, and footer (typography scale, spacing, and component styling feel unified).",
+        "Primary palette is not dominated by blue & purple together (choose an alternative modern palette).",
+        "Layout is responsive for mobile and desktop (no overlapping text in hero)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Adjust global theme tokens/variables and base typography to a cohesive modern palette that is not dominated by blue & purple together (e.g., neutral + emerald/teal accent, or neutral + warm amber accent). Keep changes consistent with Tailwind/shadcn-ui token usage and ensure readable contrast."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Update/extend Tailwind theme configuration as needed to support the chosen non-blue-and-purple-dominant palette and consistent typography/spacing utilities (without modifying any files under frontend/src/components/ui)."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Refine responsive layout (mobile-to-desktop) for hero and sections: ensure no overlapping hero text, consistent spacing, and unified component styling. Use shadcn-ui components for consistent UI primitives where helpful; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/site/SiteLayout.tsx",
+          "operation": "modify",
+          "description": "Ensure the shared layout applies consistent container widths, vertical rhythm, and typography across hero/sections/footer for a unified theme."
+        }
+      ]
+    }
+  ]
+}

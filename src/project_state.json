@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build an informational website named “Smart Janghai,” including a modern homepage with a hero image featuring the brand name.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Modern minimal tech-city hero banner with soft neutral gradient, subtle skyline silhouette, and large centered text “SMART JANGHAI” in clean sans-serif (hero-smart-janghai.dim_1920x1080.png)",
+  "existing_features": [
+    {
+      "id": "feature-build-the-public-homepage-for-the-informational-website-named-smart-janghai-including-a-hero-section-that-prominently-displays-the-brand-name-smart-janghai-and-a-short-informational-tagline-plus-a-simple-layout-for-additional-informational-sections-e-g-intro-highlights-footer",
+      "title": "Build the public homepage for the informational website named “Smart Janghai”, including a hero section that prominently displays the brand name “SMART JANGHAI” and a short informational tagline, plus a simple layout for additional informational sections (e.g., intro, highlights, footer).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-and-display-a-generated-homepage-hero-image-as-a-static-frontend-asset-stored-under-frontend-public-assets-generated-and-use-it-as-the-hero-background-primary-visual-on-the-homepage",
+      "title": "Add and display a generated homepage hero image as a static frontend asset, stored under frontend/public/assets/generated, and use it as the hero background/primary visual on the homepage.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-cohesive-modern-visual-theme-for-the-smart-janghai-informational-site-colors-typography-spacing-and-components-and-enforce-it-consistently-across-the-homepage-do-not-use-a-blue-and-purple-dominant-palette",
+      "title": "Apply a cohesive, modern visual theme for the Smart Janghai informational site (colors, typography, spacing, and components) and enforce it consistently across the homepage. Do not use a blue-and-purple dominant palette.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Generate a modern homepage hero image concept for the Smart Janghai informational website with the brand name overlaid.",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Smart Janghai",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

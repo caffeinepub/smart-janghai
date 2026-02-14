@@ -1,0 +1,82 @@
+{
+  "kind": "build_request",
+  "title": "Create Smart Janghai informational homepage with branded hero image",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Build the public homepage for the informational website named “Smart Janghai”, including a hero section that prominently displays the brand name “SMART JANGHAI” and a short informational tagline, plus a simple layout for additional informational sections (e.g., intro, highlights, footer).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2",
+          "msg-3"
+        ],
+        "quotes": [
+          "I WANT TO CREAT A WEBSITE THAT NAME IS SMART JANGHAI ... THIS WEBSITE IS COMPLETLY INFORMATIONAL WEBSITE",
+          "OK DO IT"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Homepage renders without errors and shows the brand name text exactly as “SMART JANGHAI”.",
+        "Hero section includes a short English tagline beneath the brand name.",
+        "Page includes at least two additional informational sections below the hero (content can be placeholder English text).",
+        "All user-facing text is in English."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add and display a generated homepage hero image as a static frontend asset, stored under frontend/public/assets/generated, and use it as the hero background/primary visual on the homepage.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2",
+          "msg-3"
+        ],
+        "quotes": [
+          "CAN YOU SUGGEST BEST STYLE HOMEPAGE IMAGE WITH BRAND NAME SMART JANGHAI",
+          "OK DO IT"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The generated image file is present under frontend/public/assets/generated with the exact required filename.",
+        "Homepage hero visually uses the generated image (as an <img> or CSS background) and remains readable (brand name and tagline have sufficient contrast).",
+        "No backend calls are used to serve or fetch the image."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Apply a cohesive, modern visual theme for the Smart Janghai informational site (colors, typography, spacing, and components) and enforce it consistently across the homepage. Do not use a blue-and-purple dominant palette.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3"
+        ],
+        "quotes": [
+          "OK DO IT"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Theme is consistent across hero, sections, and footer (typography scale, spacing, and component styling feel unified).",
+        "Primary palette is not dominated by blue & purple together (choose an alternative modern palette).",
+        "Layout is responsive for mobile and desktop (no overlapping text in hero)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor (no multi-service architecture).",
+    "Do not modify any files under frontend/src/components/ui or any other frontend immutable paths listed in SYSTEM_CONTEXT; compose those components instead.",
+    "Store generated images as static assets under frontend/public/assets/generated; do not route images through the backend."
+  ],
+  "nonGoals": [
+    "No user accounts or authentication flows (including Internet Identity) unless explicitly requested later.",
+    "No admin/CMS editing interface for informational content.",
+    "No third-party API integrations, analytics, or email capture forms."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Modern minimal tech-city hero banner with soft neutral gradient, subtle skyline silhouette, and large centered text “SMART JANGHAI” in clean sans-serif (hero-smart-janghai.dim_1920x1080.png)"
+    ],
+    "edits": []
+  }
+}

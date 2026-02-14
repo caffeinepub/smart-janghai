@@ -1,0 +1,18 @@
+{
+  "backend/main.mo": "Minimal Motoko canister actor with no methods.",
+  "feature_evidence.json": "Feature evidence report linking site features to related source files and components.",
+  "frontend-file-summaries.txt": "Prewritten summaries of key frontend files for reference.",
+  "frontend/index.css": "Global Tailwind base and theme variable definitions using OKLCH values for light and dark modes.",
+  "frontend/index.html": "Base HTML template mounting the React app and loading main.tsx.",
+  "frontend/src/App.tsx": "React app root returning HomePage wrapped in a QueryClientProvider.",
+  "frontend/src/components/site/SiteFooter.tsx": "Footer component with branding, copyright, and caffeine.ai attribution.",
+  "frontend/src/components/site/SiteLayout.tsx": "Layout wrapper providing main content area and footer.",
+  "frontend/src/hooks/useActor.ts": "Hook creating and managing the backend actor based on Internet Identity state.",
+  "frontend/src/hooks/useInternetIdentity.ts": "Context and provider managing Internet Identity login, storage, and status.",
+  "frontend/src/hooks/useQueries.ts": "Placeholder for future React Query hooks with no current logic.",
+  "frontend/src/index.css": "Global Tailwind theme with emerald/teal design system and light/dark mode variables.",
+  "frontend/src/main.tsx": "React entry point initializing providers and rendering the app.",
+  "frontend/src/pages/HomePage.tsx": "Smart Janghai homepage with hero image, intro content, and themed feature sections.",
+  "frontend/tailwind.config.js": "Tailwind configuration enabling dark mode, custom colors, typography, animations, and extended theme settings.",
+  "project_state.json": "Project state describing Smart Janghai website requirements, existing features, and pending hero image request."
+}
