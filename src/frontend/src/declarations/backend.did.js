@@ -8,10 +8,563 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const idlService = IDL.Service({});
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
+export const Principal = IDL.Principal;
+export const Time = IDL.Int;
+export const JobId = IDL.Text;
+export const MediaId = IDL.Text;
+export const NewsId = IDL.Text;
+export const SchemeId = IDL.Text;
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const Media = IDL.Record({
+  'id' : MediaId,
+  'contentType' : IDL.Text,
+  'size' : IDL.Nat,
+  'uploadTimestamp' : Time,
+  'filename' : IDL.Text,
+  'uploader' : Principal,
+  'fileReference' : ExternalBlob,
+});
+export const ActivityLogId = IDL.Nat;
+export const ActivityLog = IDL.Record({
+  'id' : ActivityLogId,
+  'action' : IDL.Text,
+  'user' : Principal,
+  'timestamp' : Time,
+});
+export const NotificationId = IDL.Nat;
+export const Notification = IDL.Record({
+  'id' : NotificationId,
+  'read' : IDL.Bool,
+  'recipients' : IDL.Vec(Principal),
+  'message' : IDL.Text,
+  'timestamp' : Time,
+  'delivered' : IDL.Bool,
+});
+export const JobStatus = IDL.Variant({
+  'active' : IDL.Null,
+  'expired' : IDL.Null,
+});
+export const Job = IDL.Record({
+  'id' : JobId,
+  'status' : JobStatus,
+  'salary' : IDL.Nat,
+  'applyLink' : IDL.Text,
+  'expiryDate' : Time,
+  'companyName' : IDL.Text,
+  'qualification' : IDL.Text,
+});
+export const NewsStatus = IDL.Variant({
+  'published' : IDL.Null,
+  'rejected' : IDL.Null,
+  'draft' : IDL.Null,
+});
+export const News = IDL.Record({
+  'id' : NewsId,
+  'status' : NewsStatus,
+  'title' : IDL.Text,
+  'publishDate' : Time,
+  'featuredImage' : IDL.Opt(MediaId),
+  'tags' : IDL.Vec(IDL.Text),
+  'description' : IDL.Text,
+  'scheduledPublishTime' : IDL.Opt(Time),
+  'category' : IDL.Text,
+});
+export const Scheme = IDL.Record({
+  'id' : SchemeId,
+  'documents' : IDL.Vec(MediaId),
+  'applyLink' : IDL.Text,
+  'name' : IDL.Text,
+  'importantDates' : IDL.Text,
+  'eligibilityDetails' : IDL.Text,
+});
+export const UserStatus = IDL.Variant({
+  'active' : IDL.Null,
+  'inactive' : IDL.Null,
+});
+export const User = IDL.Record({
+  'id' : Principal,
+  'status' : UserStatus,
+  'name' : IDL.Text,
+  'role' : UserRole,
+  'email' : IDL.Text,
+  'mobile' : IDL.Text,
+  'registrationDate' : Time,
+});
+export const SettingsId = IDL.Text;
+export const WebsiteSettings = IDL.Record({
+  'id' : SettingsId,
+  'contactInfo' : IDL.Text,
+  'seoTitle' : IDL.Text,
+  'tagline' : IDL.Text,
+  'socialLinks' : IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
+  'logo' : IDL.Opt(MediaId),
+  'name' : IDL.Text,
+  'seoDescription' : IDL.Text,
+});
+export const ActivityType = IDL.Variant({
+  'mediaDeleted' : IDL.Null,
+  'newsPublished' : IDL.Null,
+  'schemeCreated' : IDL.Null,
+  'schemeDeleted' : IDL.Null,
+  'mediaUploaded' : IDL.Null,
+  'backupExported' : IDL.Null,
+  'csvExported' : IDL.Null,
+  'logout' : IDL.Null,
+  'userUpdated' : IDL.Null,
+  'jobUpdated' : IDL.Null,
+  'newsUpdated' : IDL.Null,
+  'notificationCreated' : IDL.Null,
+  'login' : IDL.Null,
+  'settingsUpdated' : IDL.Null,
+  'schemeUpdated' : IDL.Null,
+  'userCreated' : IDL.Null,
+  'jobCreated' : IDL.Null,
+  'jobDeleted' : IDL.Null,
+  'newsCreated' : IDL.Null,
+  'newsDeleted' : IDL.Null,
+  'userStatusChanged' : IDL.Null,
+  'roleChanged' : IDL.Null,
+});
+export const AdminActivity = IDL.Record({
+  'principal' : Principal,
+  'activityType' : ActivityType,
+  'time' : Time,
+  'details' : IDL.Text,
+});
+export const UserId = IDL.Principal;
+
+export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'assignUserRole' : IDL.Func([Principal, UserRole], [], []),
+  'createJob' : IDL.Func(
+      [IDL.Text, IDL.Nat, IDL.Text, IDL.Text, Time],
+      [JobId],
+      [],
+    ),
+  'createNews' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Vec(IDL.Text), IDL.Opt(MediaId)],
+      [NewsId],
+      [],
+    ),
+  'createNotification' : IDL.Func([IDL.Text, IDL.Vec(Principal), Time], [], []),
+  'createScheme' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(MediaId)],
+      [SchemeId],
+      [],
+    ),
+  'createUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+  'deleteJob' : IDL.Func([JobId], [], []),
+  'deleteMedia' : IDL.Func([MediaId], [], []),
+  'deleteNewsItem' : IDL.Func([NewsId], [], []),
+  'deleteScheme' : IDL.Func([SchemeId], [], []),
+  'exportBackup' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'media' : IDL.Vec(IDL.Tuple(IDL.Text, Media)),
+          'activityLogs' : IDL.Vec(IDL.Tuple(IDL.Nat, ActivityLog)),
+          'notifications' : IDL.Vec(IDL.Tuple(IDL.Nat, Notification)),
+          'nextActivityLogId' : IDL.Nat,
+          'jobs' : IDL.Vec(IDL.Tuple(IDL.Text, Job)),
+          'news' : IDL.Vec(IDL.Tuple(IDL.Text, News)),
+          'schemes' : IDL.Vec(IDL.Tuple(IDL.Text, Scheme)),
+          'users' : IDL.Vec(IDL.Tuple(Principal, User)),
+          'nextNotificationId' : IDL.Nat,
+          'websiteSettings' : IDL.Vec(IDL.Tuple(IDL.Text, WebsiteSettings)),
+        }),
+      ],
+      [],
+    ),
+  'getActiveJobs' : IDL.Func([], [IDL.Vec(Job)], ['query']),
+  'getAdminActivityLog' : IDL.Func([], [IDL.Vec(AdminActivity)], ['query']),
+  'getAllAdminActivities' : IDL.Func([], [IDL.Vec(AdminActivity)], ['query']),
+  'getAllJobs' : IDL.Func([], [IDL.Vec(Job)], ['query']),
+  'getAllMedia' : IDL.Func([], [IDL.Vec(Media)], ['query']),
+  'getAllNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
+  'getAllPublishedNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
+  'getAllSchemes' : IDL.Func([], [IDL.Vec(Scheme)], ['query']),
+  'getAllUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getJob' : IDL.Func([JobId], [IDL.Opt(Job)], ['query']),
+  'getNotificationsForUser' : IDL.Func(
+      [UserId],
+      [IDL.Vec(Notification)],
+      ['query'],
+    ),
+  'getPublishedNewsByCategory' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(News)],
+      ['query'],
+    ),
+  'getScheme' : IDL.Func([SchemeId], [IDL.Opt(Scheme)], ['query']),
+  'getUser' : IDL.Func([Principal], [IDL.Opt(User)], ['query']),
+  'getWebsiteSettings' : IDL.Func(
+      [SettingsId],
+      [IDL.Opt(WebsiteSettings)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'markNotificationRead' : IDL.Func([NotificationId], [], []),
+  'publishNews' : IDL.Func([NewsId], [], []),
+  'recordActivity' : IDL.Func([ActivityLog], [], []),
+  'recordAdminActivity' : IDL.Func([ActivityType, IDL.Text], [], []),
+  'searchMediaByType' : IDL.Func([IDL.Text], [IDL.Vec(Media)], ['query']),
+  'setUserStatus' : IDL.Func([Principal, UserStatus], [], []),
+  'updateJob' : IDL.Func(
+      [JobId, IDL.Text, IDL.Nat, IDL.Text, IDL.Text, Time],
+      [],
+      [],
+    ),
+  'updateJobStatus' : IDL.Func([JobId, JobStatus], [], []),
+  'updateNews' : IDL.Func(
+      [
+        NewsId,
+        IDL.Text,
+        IDL.Text,
+        IDL.Text,
+        IDL.Vec(IDL.Text),
+        IDL.Opt(MediaId),
+      ],
+      [],
+      [],
+    ),
+  'updateScheme' : IDL.Func(
+      [SchemeId, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(MediaId)],
+      [],
+      [],
+    ),
+  'updateUser' : IDL.Func([Principal, IDL.Text, IDL.Text, IDL.Text], [], []),
+  'updateWebsiteSettings' : IDL.Func([WebsiteSettings], [], []),
+  'uploadMedia' : IDL.Func(
+      [IDL.Text, IDL.Text, ExternalBlob, IDL.Nat],
+      [MediaId],
+      [],
+    ),
+});
 
 export const idlInitArgs = [];
 
-export const idlFactory = ({ IDL }) => { return IDL.Service({}); };
+export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
+  const Principal = IDL.Principal;
+  const Time = IDL.Int;
+  const JobId = IDL.Text;
+  const MediaId = IDL.Text;
+  const NewsId = IDL.Text;
+  const SchemeId = IDL.Text;
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const Media = IDL.Record({
+    'id' : MediaId,
+    'contentType' : IDL.Text,
+    'size' : IDL.Nat,
+    'uploadTimestamp' : Time,
+    'filename' : IDL.Text,
+    'uploader' : Principal,
+    'fileReference' : ExternalBlob,
+  });
+  const ActivityLogId = IDL.Nat;
+  const ActivityLog = IDL.Record({
+    'id' : ActivityLogId,
+    'action' : IDL.Text,
+    'user' : Principal,
+    'timestamp' : Time,
+  });
+  const NotificationId = IDL.Nat;
+  const Notification = IDL.Record({
+    'id' : NotificationId,
+    'read' : IDL.Bool,
+    'recipients' : IDL.Vec(Principal),
+    'message' : IDL.Text,
+    'timestamp' : Time,
+    'delivered' : IDL.Bool,
+  });
+  const JobStatus = IDL.Variant({ 'active' : IDL.Null, 'expired' : IDL.Null });
+  const Job = IDL.Record({
+    'id' : JobId,
+    'status' : JobStatus,
+    'salary' : IDL.Nat,
+    'applyLink' : IDL.Text,
+    'expiryDate' : Time,
+    'companyName' : IDL.Text,
+    'qualification' : IDL.Text,
+  });
+  const NewsStatus = IDL.Variant({
+    'published' : IDL.Null,
+    'rejected' : IDL.Null,
+    'draft' : IDL.Null,
+  });
+  const News = IDL.Record({
+    'id' : NewsId,
+    'status' : NewsStatus,
+    'title' : IDL.Text,
+    'publishDate' : Time,
+    'featuredImage' : IDL.Opt(MediaId),
+    'tags' : IDL.Vec(IDL.Text),
+    'description' : IDL.Text,
+    'scheduledPublishTime' : IDL.Opt(Time),
+    'category' : IDL.Text,
+  });
+  const Scheme = IDL.Record({
+    'id' : SchemeId,
+    'documents' : IDL.Vec(MediaId),
+    'applyLink' : IDL.Text,
+    'name' : IDL.Text,
+    'importantDates' : IDL.Text,
+    'eligibilityDetails' : IDL.Text,
+  });
+  const UserStatus = IDL.Variant({
+    'active' : IDL.Null,
+    'inactive' : IDL.Null,
+  });
+  const User = IDL.Record({
+    'id' : Principal,
+    'status' : UserStatus,
+    'name' : IDL.Text,
+    'role' : UserRole,
+    'email' : IDL.Text,
+    'mobile' : IDL.Text,
+    'registrationDate' : Time,
+  });
+  const SettingsId = IDL.Text;
+  const WebsiteSettings = IDL.Record({
+    'id' : SettingsId,
+    'contactInfo' : IDL.Text,
+    'seoTitle' : IDL.Text,
+    'tagline' : IDL.Text,
+    'socialLinks' : IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
+    'logo' : IDL.Opt(MediaId),
+    'name' : IDL.Text,
+    'seoDescription' : IDL.Text,
+  });
+  const ActivityType = IDL.Variant({
+    'mediaDeleted' : IDL.Null,
+    'newsPublished' : IDL.Null,
+    'schemeCreated' : IDL.Null,
+    'schemeDeleted' : IDL.Null,
+    'mediaUploaded' : IDL.Null,
+    'backupExported' : IDL.Null,
+    'csvExported' : IDL.Null,
+    'logout' : IDL.Null,
+    'userUpdated' : IDL.Null,
+    'jobUpdated' : IDL.Null,
+    'newsUpdated' : IDL.Null,
+    'notificationCreated' : IDL.Null,
+    'login' : IDL.Null,
+    'settingsUpdated' : IDL.Null,
+    'schemeUpdated' : IDL.Null,
+    'userCreated' : IDL.Null,
+    'jobCreated' : IDL.Null,
+    'jobDeleted' : IDL.Null,
+    'newsCreated' : IDL.Null,
+    'newsDeleted' : IDL.Null,
+    'userStatusChanged' : IDL.Null,
+    'roleChanged' : IDL.Null,
+  });
+  const AdminActivity = IDL.Record({
+    'principal' : Principal,
+    'activityType' : ActivityType,
+    'time' : Time,
+    'details' : IDL.Text,
+  });
+  const UserId = IDL.Principal;
+  
+  return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'assignUserRole' : IDL.Func([Principal, UserRole], [], []),
+    'createJob' : IDL.Func(
+        [IDL.Text, IDL.Nat, IDL.Text, IDL.Text, Time],
+        [JobId],
+        [],
+      ),
+    'createNews' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Vec(IDL.Text), IDL.Opt(MediaId)],
+        [NewsId],
+        [],
+      ),
+    'createNotification' : IDL.Func(
+        [IDL.Text, IDL.Vec(Principal), Time],
+        [],
+        [],
+      ),
+    'createScheme' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(MediaId)],
+        [SchemeId],
+        [],
+      ),
+    'createUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+    'deleteJob' : IDL.Func([JobId], [], []),
+    'deleteMedia' : IDL.Func([MediaId], [], []),
+    'deleteNewsItem' : IDL.Func([NewsId], [], []),
+    'deleteScheme' : IDL.Func([SchemeId], [], []),
+    'exportBackup' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'media' : IDL.Vec(IDL.Tuple(IDL.Text, Media)),
+            'activityLogs' : IDL.Vec(IDL.Tuple(IDL.Nat, ActivityLog)),
+            'notifications' : IDL.Vec(IDL.Tuple(IDL.Nat, Notification)),
+            'nextActivityLogId' : IDL.Nat,
+            'jobs' : IDL.Vec(IDL.Tuple(IDL.Text, Job)),
+            'news' : IDL.Vec(IDL.Tuple(IDL.Text, News)),
+            'schemes' : IDL.Vec(IDL.Tuple(IDL.Text, Scheme)),
+            'users' : IDL.Vec(IDL.Tuple(Principal, User)),
+            'nextNotificationId' : IDL.Nat,
+            'websiteSettings' : IDL.Vec(IDL.Tuple(IDL.Text, WebsiteSettings)),
+          }),
+        ],
+        [],
+      ),
+    'getActiveJobs' : IDL.Func([], [IDL.Vec(Job)], ['query']),
+    'getAdminActivityLog' : IDL.Func([], [IDL.Vec(AdminActivity)], ['query']),
+    'getAllAdminActivities' : IDL.Func([], [IDL.Vec(AdminActivity)], ['query']),
+    'getAllJobs' : IDL.Func([], [IDL.Vec(Job)], ['query']),
+    'getAllMedia' : IDL.Func([], [IDL.Vec(Media)], ['query']),
+    'getAllNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
+    'getAllPublishedNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
+    'getAllSchemes' : IDL.Func([], [IDL.Vec(Scheme)], ['query']),
+    'getAllUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getJob' : IDL.Func([JobId], [IDL.Opt(Job)], ['query']),
+    'getNotificationsForUser' : IDL.Func(
+        [UserId],
+        [IDL.Vec(Notification)],
+        ['query'],
+      ),
+    'getPublishedNewsByCategory' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(News)],
+        ['query'],
+      ),
+    'getScheme' : IDL.Func([SchemeId], [IDL.Opt(Scheme)], ['query']),
+    'getUser' : IDL.Func([Principal], [IDL.Opt(User)], ['query']),
+    'getWebsiteSettings' : IDL.Func(
+        [SettingsId],
+        [IDL.Opt(WebsiteSettings)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'markNotificationRead' : IDL.Func([NotificationId], [], []),
+    'publishNews' : IDL.Func([NewsId], [], []),
+    'recordActivity' : IDL.Func([ActivityLog], [], []),
+    'recordAdminActivity' : IDL.Func([ActivityType, IDL.Text], [], []),
+    'searchMediaByType' : IDL.Func([IDL.Text], [IDL.Vec(Media)], ['query']),
+    'setUserStatus' : IDL.Func([Principal, UserStatus], [], []),
+    'updateJob' : IDL.Func(
+        [JobId, IDL.Text, IDL.Nat, IDL.Text, IDL.Text, Time],
+        [],
+        [],
+      ),
+    'updateJobStatus' : IDL.Func([JobId, JobStatus], [], []),
+    'updateNews' : IDL.Func(
+        [
+          NewsId,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Vec(IDL.Text),
+          IDL.Opt(MediaId),
+        ],
+        [],
+        [],
+      ),
+    'updateScheme' : IDL.Func(
+        [SchemeId, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(MediaId)],
+        [],
+        [],
+      ),
+    'updateUser' : IDL.Func([Principal, IDL.Text, IDL.Text, IDL.Text], [], []),
+    'updateWebsiteSettings' : IDL.Func([WebsiteSettings], [], []),
+    'uploadMedia' : IDL.Func(
+        [IDL.Text, IDL.Text, ExternalBlob, IDL.Nat],
+        [MediaId],
+        [],
+      ),
+  });
+};
 
 export const init = ({ IDL }) => { return []; };

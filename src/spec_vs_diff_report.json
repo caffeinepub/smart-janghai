@@ -1,24 +1,52 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T11:45:08.720Z",
-  "summary": "REQ-20 and REQ-21 appear implemented: hero branding is logo-only, footer copyright no longer contains “Smart Janghai”, and BrandLogo now uses a non-text placeholder on image load failure. However, the diff also introduces additional footer user-facing content (Support section and caffeine.ai attribution) that was not requested and may violate the “do not rewrite beyond removing brand-name text” non-goal.",
-  "missing_requirements": [],
+  "generatedAt": "2026-02-14T13:48:18.077Z",
+  "summary": "Implemented improved admin route guarding with explicit loading UI, a dedicated error view with Retry/Back-to-Home actions, and introduced a shared UserRole helper. Also added UI changes that expose role information in the dashboard navbar and (per file summary) added a Home page navigation entry to Admin Login. One key requirement—handling non-string/variant-shaped UserRole values robustly—does not appear fully addressed based on the diff evidence.",
+  "missing_requirements": [
+    {
+      "id": "REQ-53",
+      "requirement": "Admin role check must not rely on string literal comparison and must work with the actual returned shape from generated candid types (including variant/union shapes).",
+      "reason": "The new helper `isAdminRole` only checks `role === UserRole.admin`, which covers an enum-like representation but does not show handling for common candid variant object shapes (e.g., `{ admin: null }`) or other generated union representations. The diff provides no evidence of shape normalization/guards beyond enum equality.",
+      "evidence": [
+        "frontend/src/utils/userRole.ts",
+        "frontend/src/components/admin/AdminRouteGuard.tsx"
+      ]
+    },
+    {
+      "id": "REQ-55",
+      "requirement": "From Admin Login, successful sign-in navigates to the Admin Dashboard and the sidebar menu with admin options is visible on desktop and accessible on mobile via the existing toggle button.",
+      "reason": "No diff evidence shows updates to the Admin Login page/component to navigate to `admin-dashboard` on success, nor any changes ensuring the admin sidebar/toggle behavior. The provided changes focus on route guarding, error UI, and home-page navigation visibility.",
+      "evidence": [
+        "frontend/src/components/admin/AdminRouteGuard.tsx",
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
   "hallucinated_features": [
     {
-      "description": "Added/expanded footer content beyond removing the brand name (e.g., “Your trusted information hub”, “Support” section with email, and “Built with … caffeine.ai” attribution link with UTM parameters).",
-      "reason": "BuildRequest only asks to remove visible “Smart Janghai” branding text and adjust logo fallback behavior; it explicitly states not to redesign the homepage layout or rewrite non-branding informational copy beyond removing brand-name text.",
+      "description": "Added `toRoleLabel` utility (human-readable role labels) beyond the requested admin-authorization gating/error-state/navigation fixes.",
+      "reason": "BuildRequest only asks to fix admin gating, add an error state for auth checks, and ensure navigation to admin login/dashboard; it does not request role label conversion utilities.",
       "evidence": [
-        "frontend/src/components/site/SiteFooter.tsx"
+        "frontend/src/utils/userRole.ts"
+      ]
+    },
+    {
+      "description": "Dashboard navbar shows the user's role label and principal-derived avatar fallback.",
+      "reason": "Not explicitly requested by REQ-53/54/55; these are additional UI enhancements beyond making admin panel/options show reliably.",
+      "evidence": [
+        "frontend/src/components/dashboard/DashboardNavbar.tsx"
       ]
     }
   ],
   "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/site/BrandLogo.tsx",
-    "frontend/src/components/site/SiteFooter.tsx",
+    "frontend/src/components/admin/AdminAuthErrorView.tsx",
+    "frontend/src/components/admin/AdminRouteGuard.tsx",
+    "frontend/src/components/dashboard/DashboardNavbar.tsx",
     "frontend/src/pages/HomePage.tsx",
+    "frontend/src/utils/userRole.ts",
     "project_state.json"
   ]
 }

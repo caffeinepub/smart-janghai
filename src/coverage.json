@@ -1,37 +1,54 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T11:45:08.723Z",
+  "generatedAt": "2026-02-14T13:48:18.081Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-20",
-        "summary": "Remove any visible “SMART JANGHAI” / “Smart Janghai” branding text from the UI so the site branding is logo-only (no brand-name text shown in the hero branding area or footer).",
+        "id": "REQ-53",
+        "summary": "Fix admin authorization gating so the Admin Dashboard renders for authenticated admin principals (and is not incorrectly blocked due to mismatched role type comparisons). Update the frontend to correctly interpret the backend `UserRole` value returned by `getCallerUserRole()` and treat the admin role as authorized.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/site/SiteFooter.tsx",
-          "frontend/src/pages/HomePage.tsx"
+          "frontend/src/utils/userRole.ts",
+          "frontend/src/components/admin/AdminRouteGuard.tsx",
+          "frontend/src/components/dashboard/DashboardNavbar.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/site/SiteFooter.tsx",
-          "frontend/src/pages/HomePage.tsx"
+          "frontend/src/utils/userRole.ts",
+          "frontend/src/components/admin/AdminRouteGuard.tsx",
+          "frontend/src/components/dashboard/DashboardNavbar.tsx"
         ]
       },
       {
-        "id": "REQ-21",
-        "summary": "Update the BrandLogo component so that if the logo image fails to load, it does not fall back to showing the brand-name text; instead render a non-text fallback that preserves layout and does not cause a blank/empty page.",
+        "id": "REQ-54",
+        "summary": "Add a user-visible, non-blank failure state for admin-auth checks when the role query fails (e.g., backend trap, network error, actor unavailable). The admin page must render a clear English error message with a retry action and a 'Back to Home' action instead of staying blank or stuck on an infinite loader.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/site/BrandLogo.tsx"
+          "frontend/src/components/admin/AdminAuthErrorView.tsx",
+          "frontend/src/components/admin/AdminRouteGuard.tsx",
+          "frontend/src/hooks/admin/useAdminAuth.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/site/BrandLogo.tsx"
+          "frontend/src/components/admin/AdminAuthErrorView.tsx",
+          "frontend/src/components/admin/AdminRouteGuard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-55",
+        "summary": "Ensure there is a clear navigation path to the Admin Login and Admin Dashboard from within the running app UI (not only via internal state changes), so users can reach the admin panel reliably after deployment or refresh.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/HomePage.tsx"
         ]
       }
     ]
@@ -41,9 +58,11 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/site/BrandLogo.tsx",
-    "frontend/src/components/site/SiteFooter.tsx",
+    "frontend/src/components/admin/AdminAuthErrorView.tsx",
+    "frontend/src/components/admin/AdminRouteGuard.tsx",
+    "frontend/src/components/dashboard/DashboardNavbar.tsx",
     "frontend/src/pages/HomePage.tsx",
+    "frontend/src/utils/userRole.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,6 +1,6 @@
 import { Separator } from '@/components/ui/separator';
 import { Heart, Mail } from 'lucide-react';
-import BrandLogo from './BrandLogo';
+import TextLogo from './TextLogo';
 
 export default function SiteFooter() {
   const currentYear = new Date().getFullYear();
@@ -14,7 +14,7 @@ export default function SiteFooter() {
         <div className="flex flex-col items-center gap-4">
           <div className="text-center">
             <div className="flex justify-center mb-2">
-              <BrandLogo size="sm" />
+              <TextLogo size="sm" variant="dark" />
             </div>
             <p className="text-xs text-muted-foreground">
               Your trusted information hub

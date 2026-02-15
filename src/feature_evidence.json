@@ -2,10 +2,52 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-any-visible-smart-janghai-smart-janghai-branding-text-from-the-ui-so-the-site-branding-is-logo-only-no-brand-name-text-shown-in-the-hero-branding-area-or-footer",
-      "featureTitle": "Remove any visible “SMART JANGHAI” / “Smart Janghai” branding text from the UI so the site branding is logo-only (no brand-name text shown in the hero branding area or footer).",
+      "featureId": "feature-fix-admin-authorization-gating-so-the-admin-dashboard-renders-for-authenticated-admin-principals-and-is-not-incorrectly-blocked-due-to-mismatched-role-type-comparisons-update-the-frontend-to-correctly-interpret-the-backend-userrole-value-returned-by-getcalleruserrole-and-treat-the-admin-role-as-authorized",
+      "featureTitle": "Fix admin authorization gating so the Admin Dashboard renders for authenticated admin principals (and is not incorrectly blocked due to mismatched role type comparisons). Update the frontend to correctly interpret the backend `UserRole` value returned by `getCallerUserRole()` and treat the admin role as authorized.",
       "files": [
-        "frontend/src/components/site/SiteFooter.tsx",
+        "frontend/src/components/admin/AdminRouteGuard.tsx",
+        "frontend/src/components/dashboard/DashboardNavbar.tsx",
+        "frontend/src/utils/userRole.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-53"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-user-visible-non-blank-failure-state-for-admin-auth-checks-when-the-role-query-fails-e-g-backend-trap-network-error-actor-unavailable-the-admin-page-must-render-a-clear-english-error-message-with-a-retry-action-and-a-back-to-home-action-instead-of-staying-blank-or-stuck-on-an-infinite-loader",
+      "featureTitle": "Add a user-visible, non-blank failure state for admin-auth checks when the role query fails (e.g., backend trap, network error, actor unavailable). The admin page must render a clear English error message with a retry action and a 'Back to Home' action instead of staying blank or stuck on an infinite loader.",
+      "files": [
+        "frontend/src/components/admin/AdminAuthErrorView.tsx",
+        "frontend/src/components/admin/AdminRouteGuard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-54"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-there-is-a-clear-navigation-path-to-the-admin-login-and-admin-dashboard-from-within-the-running-app-ui-not-only-via-internal-state-changes-so-users-can-reach-the-admin-panel-reliably-after-deployment-or-refresh",
+      "featureTitle": "Ensure there is a clear navigation path to the Admin Login and Admin Dashboard from within the running app UI (not only via internal state changes), so users can reach the admin panel reliably after deployment or refresh.",
+      "files": [
         "frontend/src/pages/HomePage.tsx"
       ],
       "components": [
@@ -13,28 +55,12 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-20"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-brandlogo-component-so-that-if-the-logo-image-fails-to-load-it-does-not-fall-back-to-showing-the-brand-name-text-instead-render-a-non-text-fallback-that-preserves-layout-and-does-not-cause-a-blank-empty-page",
-      "featureTitle": "Update the BrandLogo component so that if the logo image fails to load, it does not fall back to showing the brand-name text; instead render a non-text fallback that preserves layout and does not cause a blank/empty page.",
-      "files": [
-        "frontend/src/components/site/BrandLogo.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-21"
+        "REQ-55"
       ],
       "confidence": "high"
     }

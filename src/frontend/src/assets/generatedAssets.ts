@@ -3,3 +3,4 @@
 
 export const LOGO_IMAGE = '/assets/generated/logo.png';
 export const HERO_BACKGROUND = '/assets/generated/hero-smart-janghai.dim_1920x1080.png';
+export const LOGIN_BACKGROUND = '/assets/generated/login-bg-janghai.dim_3840x2160.jpg';

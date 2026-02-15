@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Remove all visible “SMART JANGHAI” / “Smart Janghai” branding text so the site branding is logo-only, while keeping resilient logo loading without text fallbacks.
+**Goal:** Make the existing admin panel and admin options reliably accessible by fixing admin role authorization handling, adding a clear failure state, and ensuring the UI provides navigation into the admin flow.
 
 **Planned changes:**
-- Remove brand-name text from the hero branding area so only the logo image is shown.
-- Remove brand-name text from the footer (e.g., update the copyright line so it no longer includes “Smart Janghai”).
-- Update the BrandLogo component so image-load failure uses a non-text placeholder fallback that preserves layout and keeps the page fully rendered.
+- Fix `AdminRouteGuard` authorization gating so authenticated admin principals are recognized correctly based on the backend `UserRole` value returned by `getCallerUserRole()` (using the actual generated candid type shape rather than a string literal comparison).
+- Add a user-visible error state for failed admin-auth role checks (e.g., network/actor/trap), showing an English error message with Retry and Back to Home actions instead of a blank screen or infinite loading.
+- Add/ensure visible navigation from the Home UI to the Admin Login screen, and ensure successful admin login navigates to the Admin Dashboard with the existing sidebar options visible on desktop and accessible on mobile via the existing toggle.
 
-**User-visible outcome:** The UI shows only the logo for branding (no “Smart Janghai” text in hero or footer), and if the logo fails to load a neutral non-text placeholder appears instead of any brand-name text.
+**User-visible outcome:** Admin users can sign in with Internet Identity and reliably reach and see the Admin Dashboard and its existing options; non-admin users are shown the existing Access Denied screen; if the role check fails, the admin page shows a clear error with Retry and Back to Home.

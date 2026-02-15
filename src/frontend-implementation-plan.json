@@ -1,41 +1,76 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove remaining Smart Janghai text branding and ensure non-text logo fallback",
+  "title": "Fix admin access gating, error handling, and in-app navigation to admin",
   "requirements": [
     {
-      "id": "REQ-20",
-      "summary": "Remove visible “SMART JANGHAI” / “Smart Janghai” branding text so branding is logo-only in hero and footer.",
+      "id": "REQ-53",
+      "summary": "Correct admin authorization gating by interpreting `getCallerUserRole()` using the generated candid type shape (not brittle string comparisons) so admin principals can access the Admin Dashboard.",
       "acceptanceCriteria": [
-        "The hero branding area does not display any brand-name text (only the logo image is shown).",
-        "The footer does not display the brand name text (e.g., remove/replace the “© {year} Smart Janghai. All rights reserved.” wording so it no longer contains the brand name).",
-        "No other new user-facing text is introduced as a substitute for the removed brand-name text."
+        "After signing in with Internet Identity, a principal with admin role is allowed through `AdminRouteGuard` and the admin dashboard content renders (no perpetual loading, no incorrect Access Denied).",
+        "A principal without admin role is blocked and sees the existing Access Denied screen.",
+        "The role check does not rely on comparing `UserRole` to the string literal 'admin' if the backend returns a variant/union type; the check works with the actual returned shape from the generated candid types."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/site/SiteFooter.tsx",
-          "operation": "modify",
-          "description": "Remove the brand-name text from the footer copyright line while keeping the rest of the footer content unchanged (no new substitute brand text)."
+          "path": "frontend/src/utils/userRole.ts",
+          "operation": "create",
+          "description": "Add a small role-normalization helper that safely interprets the `UserRole` value returned from the backend (handling enum/variant-like shapes defensively) and exposes a boolean `isAdminRole(...)` (and optionally a `toRoleLabel(...)`) for consistent checks across the UI."
         },
         {
-          "path": "frontend/src/pages/HomePage.tsx",
+          "path": "frontend/src/components/admin/AdminRouteGuard.tsx",
           "operation": "modify",
-          "description": "Remove/avoid any user-visible brand-name text in the hero branding area by ensuring hero image alt text does not contain the brand name (so broken-image fallback text never shows the brand). Also remove the visible brand-name words from the CTA title without introducing new substitute text."
+          "description": "Update the admin role gating to use the shared role-normalization helper (e.g., `isAdminRole(role)`) instead of `role !== 'admin'`, ensuring authenticated admins render children and non-admins still see `AccessDeniedView`. Use existing shadcn/ui Card/Button patterns where needed; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/dashboard/DashboardNavbar.tsx",
+          "operation": "modify",
+          "description": "Update role display/labeling logic to use the shared role-normalization helper instead of comparing `role` to string literals, preventing mismatches in admin/user/guest labeling. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-21",
-      "summary": "Update BrandLogo so image load failure uses a non-text placeholder fallback that preserves layout.",
+      "id": "REQ-54",
+      "summary": "Show a clear, non-blank failure state when the admin role query fails, with Retry and Back to Home actions.",
       "acceptanceCriteria": [
-        "If the logo image path is invalid or the image fails to load, the component renders a simple non-text placeholder (e.g., a neutral shape/container) and the page remains fully rendered.",
-        "The fallback does not contain “SMART JANGHAI” or “Smart Janghai” text."
+        "If the role query errors, the admin route guard shows an error card (English text) with a Retry button that refetches the role query and a Back to Home button.",
+        "The page never becomes completely blank due to admin-auth query errors or unexpected role values."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/site/BrandLogo.tsx",
+          "path": "frontend/src/components/admin/AdminAuthErrorView.tsx",
+          "operation": "create",
+          "description": "Create a reusable admin-auth error view that renders an English error message in a card and provides two actions: Retry (calls a passed `onRetry`) and Back to Home (calls `onNavigate('home')`). Build the UI using existing shadcn/ui components (Card/Button/Alert as appropriate); verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/admin/AdminRouteGuard.tsx",
           "operation": "modify",
-          "description": "Replace the current text fallback with a non-text visual placeholder (e.g., neutral rounded container/skeleton) that matches the selected size height to preserve layout and maintains the resilient image-loading behavior; also ensure the rendered image metadata (alt/labels) does not include the brand name to avoid showing it on image failure."
+          "description": "Handle role-query failures by rendering the new `AdminAuthErrorView` when the role query is in an error state; wire the Retry button to `refetch()` from `useGetCallerRole()` and Back to Home to existing navigation. Also ensure unexpected/unknown role values fall back to a visible non-blank state (AccessDenied or error view as appropriate). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/admin/useAdminAuth.ts",
+          "operation": "modify",
+          "description": "Ensure the `useGetCallerRole()` hook exposes the query error state and a refetch capability to support the AdminRouteGuard Retry action (keep `retry: false` so the UI controls retries explicitly)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-55",
+      "summary": "Add clear in-app navigation to reach Admin Login and ensure successful admin sign-in lands on Admin Dashboard with admin sidebar options available.",
+      "acceptanceCriteria": [
+        "From the Home page UI, there is a visible way to open the Admin Login screen using existing `onNavigate` navigation (English label).",
+        "From Admin Login, successful sign-in navigates to the Admin Dashboard and the sidebar menu with admin options is visible on desktop and accessible on mobile via the existing toggle button."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Add a visible Home page navigation action labeled in English (e.g., \"Admin Login\") that uses existing `onNavigate('admin-login')`. Update the `HomePageProps` `onNavigate` type to include admin pages so the call is type-safe. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Align page-type wiring so Home can navigate to `admin-login` (and any necessary type adjustments) without breaking existing navigation. Ensure `admin-login` continues to render `AdminLoginPage` and `admin-dashboard` renders `AdminDashboardPage`."
         }
       ]
     }

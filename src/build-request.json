@@ -1,52 +1,68 @@
 {
   "kind": "build_request",
-  "title": "Remove remaining Smart Janghai branding text and rely on logo-only branding",
-  "priority": "normal",
+  "title": "Fix admin panel and options not showing (admin access + role handling)",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-20",
-      "text": "Remove any visible “SMART JANGHAI” / “Smart Janghai” branding text from the UI so the site branding is logo-only (no brand-name text shown in the hero branding area or footer).",
+      "id": "REQ-53",
+      "text": "Fix admin authorization gating so the Admin Dashboard renders for authenticated admin principals (and is not incorrectly blocked due to mismatched role type comparisons). Update the frontend to correctly interpret the backend `UserRole` value returned by `getCallerUserRole()` and treat the admin role as authorized.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-1"
         ],
         "quotes": [
-          "YES REMOVE TEXT"
+          "ANY OPTION AND ADMIN PANEL NOT SHOWING"
         ]
       },
       "acceptanceCriteria": [
-        "The hero branding area does not display any brand-name text (only the logo image is shown).",
-        "The footer does not display the brand name text (e.g., remove/replace the “© {year} Smart Janghai. All rights reserved.” wording so it no longer contains the brand name).",
-        "No other new user-facing text is introduced as a substitute for the removed brand-name text."
+        "After signing in with Internet Identity, a principal with admin role is allowed through `AdminRouteGuard` and the admin dashboard content renders (no perpetual loading, no incorrect Access Denied).",
+        "A principal without admin role is blocked and sees the existing Access Denied screen.",
+        "The role check does not rely on comparing `UserRole` to the string literal 'admin' if the backend returns a variant/union type; the check works with the actual returned shape from the generated candid types."
       ]
     },
     {
-      "id": "REQ-21",
-      "text": "Update the BrandLogo component so that if the logo image fails to load, it does not fall back to showing the brand-name text; instead render a non-text fallback that preserves layout and does not cause a blank/empty page.",
+      "id": "REQ-54",
+      "text": "Add a user-visible, non-blank failure state for admin-auth checks when the role query fails (e.g., backend trap, network error, actor unavailable). The admin page must render a clear English error message with a retry action and a 'Back to Home' action instead of staying blank or stuck on an infinite loader.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-1"
         ],
         "quotes": [
-          "YES REMOVE TEXT"
+          "ANY OPTION AND ADMIN PANEL NOT SHOWING"
         ]
       },
       "acceptanceCriteria": [
-        "If the logo image path is invalid or the image fails to load, the component renders a simple non-text placeholder (e.g., a neutral shape/container) and the page remains fully rendered.",
-        "The fallback does not contain “SMART JANGHAI” or “Smart Janghai” text."
+        "If the role query errors, the admin route guard shows an error card (English text) with a Retry button that refetches the role query and a Back to Home button.",
+        "The page never becomes completely blank due to admin-auth query errors or unexpected role values."
+      ]
+    },
+    {
+      "id": "REQ-55",
+      "text": "Ensure there is a clear navigation path to the Admin Login and Admin Dashboard from within the running app UI (not only via internal state changes), so users can reach the admin panel reliably after deployment or refresh.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "ANY OPTION AND ADMIN PANEL NOT SHOWING"
+        ]
+      },
+      "acceptanceCriteria": [
+        "From the Home page UI, there is a visible way to open the Admin Login screen using existing `onNavigate` navigation (English label).",
+        "From Admin Login, successful sign-in navigates to the Admin Dashboard and the sidebar menu with admin options is visible on desktop and accessible on mobile via the existing toggle button."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend immutablePaths (e.g., frontend/src/main.tsx, frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/components/ui).",
-    "Keep the existing resilient image-loading approach so missing assets never cause a blank section or blank page."
+    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts (immutable paths).",
+    "Keep the backend as a single Motoko actor in backend/main.mo; only introduce migration.mo if state changes require it."
   ],
   "nonGoals": [
-    "Do not change the hero background image asset or its path.",
-    "Do not redesign the overall homepage layout or rewrite non-branding informational copy beyond removing brand-name text.",
-    "No backend changes."
+    "Do not implement Node/Express/MongoDB/JWT-based authentication (not supported on this platform).",
+    "Do not add new admin modules beyond the existing sidebar options; this request is limited to making the current admin panel/options show reliably."
   ],
   "imageRequirements": {
     "required": [],

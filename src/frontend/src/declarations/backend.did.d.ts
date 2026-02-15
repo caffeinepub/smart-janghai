@@ -10,7 +10,228 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface _SERVICE {}
+export interface ActivityLog {
+  'id' : ActivityLogId,
+  'action' : string,
+  'user' : Principal,
+  'timestamp' : Time,
+}
+export type ActivityLogId = bigint;
+export type ActivityType = { 'mediaDeleted' : null } |
+  { 'newsPublished' : null } |
+  { 'schemeCreated' : null } |
+  { 'schemeDeleted' : null } |
+  { 'mediaUploaded' : null } |
+  { 'backupExported' : null } |
+  { 'csvExported' : null } |
+  { 'logout' : null } |
+  { 'userUpdated' : null } |
+  { 'jobUpdated' : null } |
+  { 'newsUpdated' : null } |
+  { 'notificationCreated' : null } |
+  { 'login' : null } |
+  { 'settingsUpdated' : null } |
+  { 'schemeUpdated' : null } |
+  { 'userCreated' : null } |
+  { 'jobCreated' : null } |
+  { 'jobDeleted' : null } |
+  { 'newsCreated' : null } |
+  { 'newsDeleted' : null } |
+  { 'userStatusChanged' : null } |
+  { 'roleChanged' : null };
+export interface AdminActivity {
+  'principal' : Principal,
+  'activityType' : ActivityType,
+  'time' : Time,
+  'details' : string,
+}
+export type ExternalBlob = Uint8Array;
+export interface Job {
+  'id' : JobId,
+  'status' : JobStatus,
+  'salary' : bigint,
+  'applyLink' : string,
+  'expiryDate' : Time,
+  'companyName' : string,
+  'qualification' : string,
+}
+export type JobId = string;
+export type JobStatus = { 'active' : null } |
+  { 'expired' : null };
+export interface Media {
+  'id' : MediaId,
+  'contentType' : string,
+  'size' : bigint,
+  'uploadTimestamp' : Time,
+  'filename' : string,
+  'uploader' : Principal,
+  'fileReference' : ExternalBlob,
+}
+export type MediaId = string;
+export interface News {
+  'id' : NewsId,
+  'status' : NewsStatus,
+  'title' : string,
+  'publishDate' : Time,
+  'featuredImage' : [] | [MediaId],
+  'tags' : Array<string>,
+  'description' : string,
+  'scheduledPublishTime' : [] | [Time],
+  'category' : string,
+}
+export type NewsId = string;
+export type NewsStatus = { 'published' : null } |
+  { 'rejected' : null } |
+  { 'draft' : null };
+export interface Notification {
+  'id' : NotificationId,
+  'read' : boolean,
+  'recipients' : Array<Principal>,
+  'message' : string,
+  'timestamp' : Time,
+  'delivered' : boolean,
+}
+export type NotificationId = bigint;
+export type Principal = Principal;
+export interface Scheme {
+  'id' : SchemeId,
+  'documents' : Array<MediaId>,
+  'applyLink' : string,
+  'name' : string,
+  'importantDates' : string,
+  'eligibilityDetails' : string,
+}
+export type SchemeId = string;
+export type SettingsId = string;
+export type Time = bigint;
+export interface User {
+  'id' : Principal,
+  'status' : UserStatus,
+  'name' : string,
+  'role' : UserRole,
+  'email' : string,
+  'mobile' : string,
+  'registrationDate' : Time,
+}
+export type UserId = Principal;
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
+export type UserStatus = { 'active' : null } |
+  { 'inactive' : null };
+export interface WebsiteSettings {
+  'id' : SettingsId,
+  'contactInfo' : string,
+  'seoTitle' : string,
+  'tagline' : string,
+  'socialLinks' : Array<[string, string]>,
+  'logo' : [] | [MediaId],
+  'name' : string,
+  'seoDescription' : string,
+}
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
+export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'assignUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'createJob' : ActorMethod<[string, bigint, string, string, Time], JobId>,
+  'createNews' : ActorMethod<
+    [string, string, string, Array<string>, [] | [MediaId]],
+    NewsId
+  >,
+  'createNotification' : ActorMethod<
+    [string, Array<Principal>, Time],
+    undefined
+  >,
+  'createScheme' : ActorMethod<
+    [string, string, string, string, Array<MediaId>],
+    SchemeId
+  >,
+  'createUser' : ActorMethod<[string, string, string], undefined>,
+  'deleteJob' : ActorMethod<[JobId], undefined>,
+  'deleteMedia' : ActorMethod<[MediaId], undefined>,
+  'deleteNewsItem' : ActorMethod<[NewsId], undefined>,
+  'deleteScheme' : ActorMethod<[SchemeId], undefined>,
+  'exportBackup' : ActorMethod<
+    [],
+    {
+      'media' : Array<[string, Media]>,
+      'activityLogs' : Array<[bigint, ActivityLog]>,
+      'notifications' : Array<[bigint, Notification]>,
+      'nextActivityLogId' : bigint,
+      'jobs' : Array<[string, Job]>,
+      'news' : Array<[string, News]>,
+      'schemes' : Array<[string, Scheme]>,
+      'users' : Array<[Principal, User]>,
+      'nextNotificationId' : bigint,
+      'websiteSettings' : Array<[string, WebsiteSettings]>,
+    }
+  >,
+  'getActiveJobs' : ActorMethod<[], Array<Job>>,
+  'getAdminActivityLog' : ActorMethod<[], Array<AdminActivity>>,
+  'getAllAdminActivities' : ActorMethod<[], Array<AdminActivity>>,
+  'getAllJobs' : ActorMethod<[], Array<Job>>,
+  'getAllMedia' : ActorMethod<[], Array<Media>>,
+  'getAllNews' : ActorMethod<[], Array<News>>,
+  'getAllPublishedNews' : ActorMethod<[], Array<News>>,
+  'getAllSchemes' : ActorMethod<[], Array<Scheme>>,
+  'getAllUsers' : ActorMethod<[], Array<User>>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getJob' : ActorMethod<[JobId], [] | [Job]>,
+  'getNotificationsForUser' : ActorMethod<[UserId], Array<Notification>>,
+  'getPublishedNewsByCategory' : ActorMethod<[string], Array<News>>,
+  'getScheme' : ActorMethod<[SchemeId], [] | [Scheme]>,
+  'getUser' : ActorMethod<[Principal], [] | [User]>,
+  'getWebsiteSettings' : ActorMethod<[SettingsId], [] | [WebsiteSettings]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'markNotificationRead' : ActorMethod<[NotificationId], undefined>,
+  'publishNews' : ActorMethod<[NewsId], undefined>,
+  'recordActivity' : ActorMethod<[ActivityLog], undefined>,
+  'recordAdminActivity' : ActorMethod<[ActivityType, string], undefined>,
+  'searchMediaByType' : ActorMethod<[string], Array<Media>>,
+  'setUserStatus' : ActorMethod<[Principal, UserStatus], undefined>,
+  'updateJob' : ActorMethod<
+    [JobId, string, bigint, string, string, Time],
+    undefined
+  >,
+  'updateJobStatus' : ActorMethod<[JobId, JobStatus], undefined>,
+  'updateNews' : ActorMethod<
+    [NewsId, string, string, string, Array<string>, [] | [MediaId]],
+    undefined
+  >,
+  'updateScheme' : ActorMethod<
+    [SchemeId, string, string, string, string, Array<MediaId>],
+    undefined
+  >,
+  'updateUser' : ActorMethod<[Principal, string, string, string], undefined>,
+  'updateWebsiteSettings' : ActorMethod<[WebsiteSettings], undefined>,
+  'uploadMedia' : ActorMethod<[string, string, ExternalBlob, bigint], MediaId>,
+}
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
 export declare const idlFactory: IDL.InterfaceFactory;
