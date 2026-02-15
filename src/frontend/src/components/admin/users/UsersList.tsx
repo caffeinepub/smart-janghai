@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useGetAllUsers, useSetUserStatus } from '@/hooks/admin/users';
+import { useGetAllUsers, useSetUserStatus, useDeleteUser } from '@/hooks/admin/users';
 import AdminDataTable from '../common/AdminDataTable';
+import DeleteConfirmDialog from '../common/DeleteConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Edit, Power, PowerOff } from 'lucide-react';
+import { Eye, Edit, Power, PowerOff, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserStatus } from '@/backend';
@@ -17,7 +18,9 @@ interface UsersListProps {
 export default function UsersList({ onEdit, onView }: UsersListProps) {
   const { data: users, isLoading } = useGetAllUsers();
   const setStatusMutation = useSetUserStatus();
+  const deleteMutation = useDeleteUser();
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
 
   const filteredUsers = users?.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -28,6 +31,12 @@ export default function UsersList({ onEdit, onView }: UsersListProps) {
   const handleToggleStatus = async (user: User) => {
     const newStatus = user.status === UserStatus.active ? UserStatus.inactive : UserStatus.active;
     await setStatusMutation.mutateAsync({ id: user.id.toString(), status: newStatus });
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    await deleteMutation.mutateAsync(deleteTarget.id.toString());
+    setDeleteTarget(null);
   };
 
   const columns = [
@@ -81,6 +90,14 @@ export default function UsersList({ onEdit, onView }: UsersListProps) {
               <Power className="w-4 h-4 text-green-600" />
             )}
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeleteTarget(user)}
+            disabled={deleteMutation.isPending}
+          >
+            <Trash2 className="w-4 h-4 text-destructive" />
+          </Button>
         </div>
       ),
     },
@@ -98,16 +115,27 @@ export default function UsersList({ onEdit, onView }: UsersListProps) {
   }
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <AdminDataTable
-          data={filteredUsers}
-          columns={columns}
-          searchPlaceholder="Search users by name, email, or mobile..."
-          onSearch={setSearchQuery}
-          emptyMessage="No users found"
-        />
-      </CardContent>
-    </Card>
+    <>
+      <Card>
+        <CardContent className="pt-6">
+          <AdminDataTable
+            data={filteredUsers}
+            columns={columns}
+            searchPlaceholder="Search users by name, email, or mobile..."
+            onSearch={setSearchQuery}
+            emptyMessage="No users found"
+          />
+        </CardContent>
+      </Card>
+
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete User"
+        description="Are you sure you want to delete this user? This action cannot be undone."
+        isDeleting={deleteMutation.isPending}
+      />
+    </>
   );
 }

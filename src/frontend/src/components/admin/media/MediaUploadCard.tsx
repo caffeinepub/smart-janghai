@@ -4,12 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import FormErrorText from '../common/FormErrorText';
 import { Upload, Loader2 } from 'lucide-react';
 
 export default function MediaUploadCard() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
   const uploadMutation = useUploadMedia();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,6 +25,7 @@ export default function MediaUploadCard() {
       }
       setFile(selectedFile);
       setError('');
+      setUploadProgress(0);
     }
   };
 
@@ -37,14 +40,17 @@ export default function MediaUploadCard() {
         filename: file.name,
         contentType: file.type,
         file,
+        onProgress: (percentage) => setUploadProgress(percentage),
       });
       setFile(null);
       setError('');
+      setUploadProgress(0);
       // Reset input
       const input = document.getElementById('file-upload') as HTMLInputElement;
       if (input) input.value = '';
     } catch (err: any) {
       setError(err.message || 'Failed to upload file');
+      setUploadProgress(0);
     }
   };
 
@@ -70,6 +76,15 @@ export default function MediaUploadCard() {
           )}
           <FormErrorText error={error} />
         </div>
+
+        {uploadMutation.isPending && uploadProgress > 0 && (
+          <div className="space-y-2">
+            <Progress value={uploadProgress} />
+            <p className="text-sm text-muted-foreground text-center">
+              Uploading... {uploadProgress}%
+            </p>
+          </div>
+        )}
 
         <Button onClick={handleUpload} disabled={!file || uploadMutation.isPending}>
           {uploadMutation.isPending ? (

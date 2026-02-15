@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import FeaturedImagePickerDialog from './FeaturedImagePickerDialog';
 import FormErrorText from '../common/FormErrorText';
-import { Loader2 } from 'lucide-react';
-import type { News } from '@/backend';
+import { Loader2, Image as ImageIcon } from 'lucide-react';
+import type { News, MediaId } from '@/backend';
 
 interface NewsFormProps {
   news: News | null;
@@ -18,6 +19,8 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [tags, setTags] = useState('');
+  const [featuredImage, setFeaturedImage] = useState<MediaId | null>(null);
+  const [showImagePicker, setShowImagePicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateNews();
@@ -29,11 +32,13 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
       setDescription(news.description);
       setCategory(news.category);
       setTags(news.tags.join(', '));
+      setFeaturedImage(news.featuredImage || null);
     } else {
       setTitle('');
       setDescription('');
       setCategory('');
       setTags('');
+      setFeaturedImage(null);
     }
     setErrors({});
   }, [news]);
@@ -61,7 +66,7 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
           description,
           category,
           tags: tagsArray,
-          featuredImage: null,
+          featuredImage,
         });
       } else {
         await createMutation.mutateAsync({
@@ -69,7 +74,7 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
           description,
           category,
           tags: tagsArray,
-          featuredImage: null,
+          featuredImage,
         });
       }
       onSuccess();
@@ -81,69 +86,95 @@ export default function NewsForm({ news, onSuccess }: NewsFormProps) {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title">Title *</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter news title"
-          disabled={isPending}
-        />
-        <FormErrorText error={errors.title} />
-      </div>
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="title">Title *</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter news title"
+            disabled={isPending}
+          />
+          <FormErrorText error={errors.title} />
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter news description"
-          rows={6}
-          disabled={isPending}
-        />
-        <FormErrorText error={errors.description} />
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="description">Description *</Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter news description"
+            rows={6}
+            disabled={isPending}
+          />
+          <FormErrorText error={errors.description} />
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="category">Category *</Label>
-        <Input
-          id="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Enter category"
-          disabled={isPending}
-        />
-        <FormErrorText error={errors.category} />
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="category">Category *</Label>
+          <Input
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Enter category"
+            disabled={isPending}
+          />
+          <FormErrorText error={errors.category} />
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="tags">Tags (comma-separated)</Label>
-        <Input
-          id="tags"
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          placeholder="tag1, tag2, tag3"
-          disabled={isPending}
-        />
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="tags">Tags (comma-separated)</Label>
+          <Input
+            id="tags"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="tag1, tag2, tag3"
+            disabled={isPending}
+          />
+        </div>
 
-      {errors.submit && <FormErrorText error={errors.submit} />}
-
-      <div className="flex justify-end gap-2">
-        <Button type="submit" disabled={isPending}>
-          {isPending ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            'Save'
+        <div className="space-y-2">
+          <Label>Featured Image</Label>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowImagePicker(true)}
+            disabled={isPending}
+            className="w-full"
+          >
+            <ImageIcon className="w-4 h-4 mr-2" />
+            {featuredImage ? 'Change Featured Image' : 'Select Featured Image'}
+          </Button>
+          {featuredImage && (
+            <p className="text-sm text-muted-foreground">Image selected: {featuredImage}</p>
           )}
-        </Button>
-      </div>
-    </form>
+        </div>
+
+        {errors.submit && <FormErrorText error={errors.submit} />}
+
+        <div className="flex justify-end gap-2">
+          <Button type="submit" disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save'
+            )}
+          </Button>
+        </div>
+      </form>
+
+      <FeaturedImagePickerDialog
+        open={showImagePicker}
+        onOpenChange={setShowImagePicker}
+        onSelect={setFeaturedImage}
+        selectedMediaId={featuredImage}
+      />
+    </>
   );
 }

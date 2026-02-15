@@ -1,71 +1,87 @@
 {
   "kind": "build_request",
-  "title": "Fix admin panel and options not showing (admin access + role handling)",
+  "title": "Emergency website decommission + data wipe mode",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-53",
-      "text": "Fix admin authorization gating so the Admin Dashboard renders for authenticated admin principals (and is not incorrectly blocked due to mismatched role type comparisons). Update the frontend to correctly interpret the backend `UserRole` value returned by `getCallerUserRole()` and treat the admin role as authorized.",
-      "target": "frontend",
+      "id": "REQ-1",
+      "text": "Add a backend-wide decommission switch that, when enabled, prevents normal app usage by rejecting or disabling all non-essential canister methods (including member and admin features) with a clear English error message indicating the website has been decommissioned.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-3"
         ],
         "quotes": [
-          "ANY OPTION AND ADMIN PANEL NOT SHOWING"
+          "DELETE WEBSITE NOW FROM EVERWHERE"
         ]
       },
       "acceptanceCriteria": [
-        "After signing in with Internet Identity, a principal with admin role is allowed through `AdminRouteGuard` and the admin dashboard content renders (no perpetual loading, no incorrect Access Denied).",
-        "A principal without admin role is blocked and sees the existing Access Denied screen.",
-        "The role check does not rely on comparing `UserRole` to the string literal 'admin' if the backend returns a variant/union type; the check works with the actual returned shape from the generated candid types."
+        "Backend stores a persistent `isDecommissioned` (or equivalent) flag in stable state so it survives upgrades/redeploys",
+        "When decommission mode is enabled, all regular feature methods (users/news/schemes/jobs/media/notifications/settings/admin/security export, etc.) are blocked in a consistent way (trap or return error) with an English message that the site is decommissioned",
+        "A minimal status/read-only method remains available to allow the frontend to detect decommission state (e.g., `getSystemStatus` returning `isDecommissioned`)"
       ]
     },
     {
-      "id": "REQ-54",
-      "text": "Add a user-visible, non-blank failure state for admin-auth checks when the role query fails (e.g., backend trap, network error, actor unavailable). The admin page must render a clear English error message with a retry action and a 'Back to Home' action instead of staying blank or stuck on an infinite loader.",
-      "target": "frontend",
+      "id": "REQ-2",
+      "text": "Implement an admin-only backend operation to immediately decommission the website and purge all stored application data from canister state (users, news, schemes, jobs, media metadata, notifications, website settings, activity logs, and any counters/IDs).",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-3"
         ],
         "quotes": [
-          "ANY OPTION AND ADMIN PANEL NOT SHOWING"
+          "DELETE WEBSITE NOW FROM EVERWHERE"
         ]
       },
       "acceptanceCriteria": [
-        "If the role query errors, the admin route guard shows an error card (English text) with a Retry button that refetches the role query and a Back to Home button.",
-        "The page never becomes completely blank due to admin-auth query errors or unexpected role values."
+        "There is a single admin-only method (e.g., `decommissionAndWipeAllData`) that (1) sets decommission mode ON and (2) clears all in-canister collections and resets counters/IDs",
+        "After running the wipe, subsequent reads for previously-created records return empty results / not found (as appropriate)",
+        "The wipe operation records an admin activity log entry if logging is still allowed; otherwise it completes without depending on logging",
+        "The operation is protected so non-admin callers cannot execute it"
       ]
     },
     {
-      "id": "REQ-55",
-      "text": "Ensure there is a clear navigation path to the Admin Login and Admin Dashboard from within the running app UI (not only via internal state changes), so users can reach the admin panel reliably after deployment or refresh.",
+      "id": "REQ-3",
+      "text": "Add a frontend ‘Website Decommissioned’ screen and route override so that when the backend reports the app is decommissioned, all routes (home/login/dashboards/admin) are replaced with a single decommissioned message page in English.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-3"
         ],
         "quotes": [
-          "ANY OPTION AND ADMIN PANEL NOT SHOWING"
+          "DELETE WEBSITE NOW FROM EVERWHERE"
         ]
       },
       "acceptanceCriteria": [
-        "From the Home page UI, there is a visible way to open the Admin Login screen using existing `onNavigate` navigation (English label).",
-        "From Admin Login, successful sign-in navigates to the Admin Dashboard and the sidebar menu with admin options is visible on desktop and accessible on mobile via the existing toggle button."
+        "On initial load (and when navigating), the frontend checks backend system status and detects decommission mode",
+        "If decommission mode is ON, the app renders only the decommissioned screen regardless of URL hash/route",
+        "The decommissioned screen contains only English user-facing text and does not expose any admin/member functionality (no login actions)",
+        "The decommissioned screen renders without relying on protected APIs that will be blocked in decommission mode (i.e., it must not crash due to blocked feature calls)"
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts (immutable paths).",
-    "Keep the backend as a single Motoko actor in backend/main.mo; only introduce migration.mo if state changes require it."
+    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if stable-state migration is required by the decommission flag and wipe behavior",
+    "Do not edit any files under frontend/src/components/ui or any paths listed in frontend.immutablePaths (compose instead)",
+    "Use English for any user-facing text"
   ],
   "nonGoals": [
-    "Do not implement Node/Express/MongoDB/JWT-based authentication (not supported on this platform).",
-    "Do not add new admin modules beyond the existing sidebar options; this request is limited to making the current admin panel/options show reliably."
+    "Deleting the canister from the Internet Computer network, removing DNS records, or taking down hosting outside of this codebase",
+    "Erasing data outside of canister state (e.g., external storage or third-party services)",
+    "Adding new product features unrelated to decommissioning"
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

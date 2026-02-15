@@ -14,14 +14,25 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
+export interface UserProfile {
+    name: string;
+    email: string;
+    mobile: string;
+}
+export type SettingsId = string;
+export type Time = bigint;
 export interface AdminActivity {
     principal: Principal;
     activityType: ActivityType;
     time: Time;
     details: string;
 }
-export type SettingsId = string;
-export type Time = bigint;
+export interface RecentActivity {
+    activityType: ActivityType;
+    user: Principal;
+    timestamp: Time;
+    details: string;
+}
 export interface Job {
     id: JobId;
     status: JobStatus;
@@ -68,7 +79,12 @@ export interface ActivityLog {
     timestamp: Time;
 }
 export type Principal = Principal;
-export type JobId = string;
+export interface MonthlyGrowth {
+    month: string;
+    jobs: bigint;
+    news: bigint;
+    users: bigint;
+}
 export interface Scheme {
     id: SchemeId;
     documents: Array<MediaId>;
@@ -77,6 +93,7 @@ export interface Scheme {
     importantDates: string;
     eligibilityDetails: string;
 }
+export type JobId = string;
 export type UserId = Principal;
 export type ActivityLogId = bigint;
 export type NotificationId = bigint;
@@ -98,6 +115,16 @@ export interface News {
     description: string;
     scheduledPublishTime?: Time;
     category: string;
+}
+export interface DashboardMetrics {
+    totalMedia: bigint;
+    totalSchemes: bigint;
+    publishedNews: bigint;
+    totalJobs: bigint;
+    totalNews: bigint;
+    totalNotifications: bigint;
+    totalUsers: bigint;
+    activeJobs: bigint;
 }
 export type MediaId = string;
 export enum ActivityType {
@@ -147,13 +174,15 @@ export interface backendInterface {
     assignUserRole(id: Principal, role: UserRole): Promise<void>;
     createJob(companyName: string, salary: bigint, qualification: string, applyLink: string, expiryDate: Time): Promise<JobId>;
     createNews(title: string, description: string, category: string, tags: Array<string>, featuredImage: MediaId | null): Promise<NewsId>;
-    createNotification(message: string, recipients: Array<Principal>, timestamp: Time): Promise<void>;
+    createNotification(message: string, recipients: Array<Principal>): Promise<NotificationId>;
     createScheme(name: string, eligibilityDetails: string, applyLink: string, importantDates: string, documents: Array<MediaId>): Promise<SchemeId>;
-    createUser(name: string, mobile: string, email: string): Promise<void>;
+    createUser(targetUserId: Principal, name: string, mobile: string, email: string, role: UserRole): Promise<void>;
+    decommissionWebsite(): Promise<void>;
     deleteJob(id: JobId): Promise<void>;
     deleteMedia(id: MediaId): Promise<void>;
     deleteNewsItem(id: NewsId): Promise<void>;
     deleteScheme(id: SchemeId): Promise<void>;
+    deleteUser(id: Principal): Promise<void>;
     exportBackup(): Promise<{
         media: Array<[string, Media]>;
         activityLogs: Array<[bigint, ActivityLog]>;
@@ -172,21 +201,29 @@ export interface backendInterface {
     getAllJobs(): Promise<Array<Job>>;
     getAllMedia(): Promise<Array<Media>>;
     getAllNews(): Promise<Array<News>>;
+    getAllNotifications(): Promise<Array<Notification>>;
     getAllPublishedNews(): Promise<Array<News>>;
     getAllSchemes(): Promise<Array<Scheme>>;
     getAllUsers(): Promise<Array<User>>;
+    getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
+    getDashboardMetrics(): Promise<DashboardMetrics>;
     getJob(id: JobId): Promise<Job | null>;
+    getMedia(id: MediaId): Promise<Media | null>;
+    getMonthlyGrowth(months: bigint): Promise<Array<MonthlyGrowth>>;
     getNotificationsForUser(userId: UserId): Promise<Array<Notification>>;
     getPublishedNewsByCategory(category: string): Promise<Array<News>>;
+    getRecentActivity(limit: bigint): Promise<Array<RecentActivity>>;
     getScheme(id: SchemeId): Promise<Scheme | null>;
     getUser(id: Principal): Promise<User | null>;
+    getUserProfile(userId: Principal): Promise<UserProfile | null>;
     getWebsiteSettings(id: SettingsId): Promise<WebsiteSettings | null>;
     isCallerAdmin(): Promise<boolean>;
     markNotificationRead(notifId: NotificationId): Promise<void>;
     publishNews(id: NewsId): Promise<void>;
     recordActivity(activity: ActivityLog): Promise<void>;
     recordAdminActivity(activityType: ActivityType, details: string): Promise<void>;
+    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     searchMediaByType(contentType: string): Promise<Array<Media>>;
     setUserStatus(id: Principal, status: UserStatus): Promise<void>;
     updateJob(id: JobId, companyName: string, salary: bigint, qualification: string, applyLink: string, expiryDate: Time): Promise<void>;

@@ -28,9 +28,14 @@ export default function DashboardNavbar({ onNavigate, isAdminMode = false }: Das
   const queryClient = useQueryClient();
 
   const handleLogout = async () => {
+    // Clear identity and all cached data
     await clear();
     queryClient.clear();
-    onNavigate(isAdminMode ? 'admin-login' : 'login');
+    
+    // Navigate to appropriate login page based on mode
+    // This will update both the URL hash and render the correct page
+    const targetPage = isAdminMode ? 'admin-login' : 'login';
+    onNavigate(targetPage);
   };
 
   const principalText = identity?.getPrincipal().toString() || '';

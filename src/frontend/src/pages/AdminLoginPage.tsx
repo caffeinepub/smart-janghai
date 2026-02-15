@@ -22,9 +22,16 @@ export default function AdminLoginPage({ onNavigate }: AdminLoginPageProps) {
   const handleLogin = async () => {
     try {
       await login();
+      // Navigation happens in useEffect after identity is set
     } catch (error: any) {
       console.error('Login error:', error);
     }
+  };
+
+  const handleBackToHome = () => {
+    // Navigate to home using the centralized handler
+    // This will set hash to empty string and render HomePage
+    onNavigate('home');
   };
 
   const isLoading = loginStatus === 'logging-in';
@@ -73,7 +80,7 @@ export default function AdminLoginPage({ onNavigate }: AdminLoginPageProps) {
             <div className="text-center text-sm text-muted-foreground">
               <Button
                 variant="link"
-                onClick={() => onNavigate('home')}
+                onClick={handleBackToHome}
                 className="text-sm"
               >
                 Back to Home

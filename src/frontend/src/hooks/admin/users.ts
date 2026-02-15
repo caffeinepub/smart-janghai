@@ -34,9 +34,21 @@ export function useCreateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { name: string; mobile: string; email: string }) => {
+    mutationFn: async (data: { 
+      targetUserId: string; 
+      name: string; 
+      mobile: string; 
+      email: string; 
+      role: UserRole;
+    }) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.createUser(data.name, data.mobile, data.email);
+      await actor.createUser(
+        Principal.fromText(data.targetUserId),
+        data.name,
+        data.mobile,
+        data.email,
+        data.role
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -52,6 +64,21 @@ export function useUpdateUser() {
     mutationFn: async (data: { id: string; name: string; mobile: string; email: string }) => {
       if (!actor) throw new Error('Actor not available');
       await actor.updateUser(Principal.fromText(data.id), data.name, data.mobile, data.email);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.deleteUser(Principal.fromText(id));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });

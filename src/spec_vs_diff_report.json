@@ -1,52 +1,68 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T13:48:18.077Z",
-  "summary": "Implemented improved admin route guarding with explicit loading UI, a dedicated error view with Retry/Back-to-Home actions, and introduced a shared UserRole helper. Also added UI changes that expose role information in the dashboard navbar and (per file summary) added a Home page navigation entry to Admin Login. One key requirement—handling non-string/variant-shaped UserRole values robustly—does not appear fully addressed based on the diff evidence.",
+  "generatedAt": "2026-02-15T06:52:10.393Z",
+  "summary": "Backend decommissioning support appears partially started (a `decommissioned` flag and a `checkDecommissioned()` trap), and the frontend adds a Decommissioned page with route override. However, key acceptance criteria are not evidenced: no explicit stable persistence of the flag, no minimal status API (`getSystemStatus`), no admin-only decommission-and-wipe operation, and the frontend detects decommissioning via probing a blocked feature API instead of reading system status.",
   "missing_requirements": [
     {
-      "id": "REQ-53",
-      "requirement": "Admin role check must not rely on string literal comparison and must work with the actual returned shape from generated candid types (including variant/union shapes).",
-      "reason": "The new helper `isAdminRole` only checks `role === UserRole.admin`, which covers an enum-like representation but does not show handling for common candid variant object shapes (e.g., `{ admin: null }`) or other generated union representations. The diff provides no evidence of shape normalization/guards beyond enum equality.",
+      "id": "REQ-1",
+      "requirement": "Persist a backend-wide decommission flag in stable state, block all regular feature methods consistently when enabled, and expose a minimal status/read-only method (e.g., `getSystemStatus`) to report `isDecommissioned`.",
+      "reason": "Diff shows `var decommissioned : Bool = false;` and a `checkDecommissioned()` trap, but does not show stable variable persistence across upgrades nor an explicit `getSystemStatus` (or equivalent) method. The frontend hook also indicates there is no status endpoint and instead probes `getAllPublishedNews()`. Blocking of “all regular feature methods” is not verifiable from the truncated backend file.",
       "evidence": [
-        "frontend/src/utils/userRole.ts",
-        "frontend/src/components/admin/AdminRouteGuard.tsx"
+        "backend/main.mo",
+        "frontend/src/hooks/useSystemStatus.ts"
       ]
     },
     {
-      "id": "REQ-55",
-      "requirement": "From Admin Login, successful sign-in navigates to the Admin Dashboard and the sidebar menu with admin options is visible on desktop and accessible on mobile via the existing toggle button.",
-      "reason": "No diff evidence shows updates to the Admin Login page/component to navigate to `admin-dashboard` on success, nor any changes ensuring the admin sidebar/toggle behavior. The provided changes focus on route guarding, error UI, and home-page navigation visibility.",
+      "id": "REQ-2",
+      "requirement": "Add a single admin-only backend method (e.g., `decommissionAndWipeAllData`) that turns decommission mode ON and purges all canister state (users/news/schemes/jobs/media metadata/notifications/settings/activity logs/counters), with admin-only protection and optional activity logging.",
+      "reason": "No admin-only wipe method is shown in the diff summary. No evidence of clearing all collections and resetting counters/IDs, nor access control checks specific to the wipe operation, nor logging behavior for the operation.",
       "evidence": [
-        "frontend/src/components/admin/AdminRouteGuard.tsx",
-        "frontend-file-summaries.txt"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Frontend must check backend system status on initial load and navigation, and if decommissioned, override all routes with a single decommissioned screen without relying on protected APIs that will be blocked.",
+      "reason": "While the Decommissioned page and route override exist, the frontend does not call a backend system-status method. Instead it calls `actor.getAllPublishedNews()` and infers decommissioning from trapped error text, which relies on a protected feature API that should be blocked during decommission mode (contrary to the intent/AC of using a minimal status method).",
+      "evidence": [
+        "frontend/src/hooks/useSystemStatus.ts",
+        "frontend/src/App.tsx",
+        "frontend/src/pages/DecommissionedPage.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added `toRoleLabel` utility (human-readable role labels) beyond the requested admin-authorization gating/error-state/navigation fixes.",
-      "reason": "BuildRequest only asks to fix admin gating, add an error state for auth checks, and ensure navigation to admin login/dashboard; it does not request role label conversion utilities.",
+      "description": "Frontend decommission detection implemented by probing `getAllPublishedNews()` and parsing error messages (\"decommissioned\" / \"Service Unavailable\") instead of using a minimal `getSystemStatus` API.",
+      "reason": "BuildRequest explicitly calls for a minimal status/read-only method to detect decommission state; this workaround is not requested and undermines the stated approach.",
       "evidence": [
-        "frontend/src/utils/userRole.ts"
+        "frontend/src/hooks/useSystemStatus.ts"
       ]
     },
     {
-      "description": "Dashboard navbar shows the user's role label and principal-derived avatar fallback.",
-      "reason": "Not explicitly requested by REQ-53/54/55; these are additional UI enhancements beyond making admin panel/options show reliably.",
+      "description": "Added `backend/migration.mo` that initializes a new actor state by emptying `users` and setting `decommissioned = false`.",
+      "reason": "BuildRequest only allowed adding a migration file if needed for stable-state migration due to the decommission flag/wipe behavior; the shown migration logic appears to wipe users and does not evidence proper migration of existing state or setting decommission mode for decommissioning.",
       "evidence": [
-        "frontend/src/components/dashboard/DashboardNavbar.tsx"
+        "backend/migration.mo"
+      ]
+    },
+    {
+      "description": "App adds a 100ms polling interval to resync URL hash routing state.",
+      "reason": "Not requested as part of decommissioning behavior; incidental routing/polling logic added beyond the stated requirements.",
+      "evidence": [
+        "frontend/src/App.tsx"
       ]
     }
   ],
   "confidence": 0.74,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/admin/AdminAuthErrorView.tsx",
-    "frontend/src/components/admin/AdminRouteGuard.tsx",
-    "frontend/src/components/dashboard/DashboardNavbar.tsx",
-    "frontend/src/pages/HomePage.tsx",
-    "frontend/src/utils/userRole.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/hooks/useSystemStatus.ts",
+    "frontend/src/pages/DecommissionedPage.tsx",
     "project_state.json"
   ]
 }

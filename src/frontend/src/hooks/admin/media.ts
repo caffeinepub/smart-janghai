@@ -21,12 +21,23 @@ export function useUploadMedia() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { filename: string; contentType: string; file: File }) => {
+    mutationFn: async (data: { 
+      filename: string; 
+      contentType: string; 
+      file: File;
+      onProgress?: (percentage: number) => void;
+    }) => {
       if (!actor) throw new Error('Actor not available');
       
       const arrayBuffer = await data.file.arrayBuffer();
       const bytes = new Uint8Array(arrayBuffer);
-      const blob = ExternalBlob.fromBytes(bytes);
+      
+      let blob = ExternalBlob.fromBytes(bytes);
+      
+      // Add upload progress tracking if callback provided
+      if (data.onProgress) {
+        blob = blob.withUploadProgress(data.onProgress);
+      }
       
       return actor.uploadMedia(data.filename, data.contentType, blob, BigInt(data.file.size));
     },

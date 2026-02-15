@@ -3,6 +3,7 @@ import { useCreateJob, useUpdateJob } from '@/hooks/admin/jobs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import FormErrorText from '../common/FormErrorText';
 import { Loader2 } from 'lucide-react';
 import type { Job } from '@/backend';
@@ -29,6 +30,7 @@ export default function JobForm({ job, onSuccess }: JobFormProps) {
       setSalary(job.salary.toString());
       setQualification(job.qualification);
       setApplyLink(job.applyLink);
+      // Convert nanoseconds to date string
       const date = new Date(Number(job.expiryDate) / 1000000);
       setExpiryDate(date.toISOString().split('T')[0]);
     } else {
@@ -45,6 +47,7 @@ export default function JobForm({ job, onSuccess }: JobFormProps) {
     const newErrors: Record<string, string> = {};
     if (!companyName.trim()) newErrors.companyName = 'Company name is required';
     if (!salary.trim()) newErrors.salary = 'Salary is required';
+    else if (isNaN(Number(salary)) || Number(salary) < 0) newErrors.salary = 'Invalid salary amount';
     if (!qualification.trim()) newErrors.qualification = 'Qualification is required';
     if (!applyLink.trim()) newErrors.applyLink = 'Apply link is required';
     if (!expiryDate) newErrors.expiryDate = 'Expiry date is required';
@@ -56,6 +59,7 @@ export default function JobForm({ job, onSuccess }: JobFormProps) {
     e.preventDefault();
     if (!validate()) return;
 
+    // Convert date to nanoseconds timestamp
     const expiryTimestamp = BigInt(new Date(expiryDate).getTime() * 1000000);
 
     try {
@@ -88,9 +92,9 @@ export default function JobForm({ job, onSuccess }: JobFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="company">Company Name *</Label>
+        <Label htmlFor="companyName">Company Name *</Label>
         <Input
-          id="company"
+          id="companyName"
           value={companyName}
           onChange={(e) => setCompanyName(e.target.value)}
           placeholder="Enter company name"
@@ -100,13 +104,13 @@ export default function JobForm({ job, onSuccess }: JobFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="salary">Salary *</Label>
+        <Label htmlFor="salary">Salary (₹) *</Label>
         <Input
           id="salary"
           type="number"
           value={salary}
           onChange={(e) => setSalary(e.target.value)}
-          placeholder="Enter salary"
+          placeholder="Enter salary amount"
           disabled={isPending}
         />
         <FormErrorText error={errors.salary} />
@@ -114,11 +118,12 @@ export default function JobForm({ job, onSuccess }: JobFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="qualification">Qualification *</Label>
-        <Input
+        <Textarea
           id="qualification"
           value={qualification}
           onChange={(e) => setQualification(e.target.value)}
-          placeholder="Enter qualification"
+          placeholder="Enter required qualification"
+          rows={3}
           disabled={isPending}
         />
         <FormErrorText error={errors.qualification} />
@@ -137,9 +142,9 @@ export default function JobForm({ job, onSuccess }: JobFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="expiry">Expiry Date *</Label>
+        <Label htmlFor="expiryDate">Expiry Date *</Label>
         <Input
-          id="expiry"
+          id="expiryDate"
           type="date"
           value={expiryDate}
           onChange={(e) => setExpiryDate(e.target.value)}

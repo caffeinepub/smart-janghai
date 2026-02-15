@@ -1,76 +1,37 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix admin access gating, error handling, and in-app navigation to admin",
+  "title": "Decommission mode frontend route override + decommissioned screen",
   "requirements": [
     {
-      "id": "REQ-53",
-      "summary": "Correct admin authorization gating by interpreting `getCallerUserRole()` using the generated candid type shape (not brittle string comparisons) so admin principals can access the Admin Dashboard.",
+      "id": "REQ-3",
+      "summary": "Add a global decommission-state check and render a single English “Website Decommissioned” screen that overrides all routes when the backend reports the site is decommissioned.",
       "acceptanceCriteria": [
-        "After signing in with Internet Identity, a principal with admin role is allowed through `AdminRouteGuard` and the admin dashboard content renders (no perpetual loading, no incorrect Access Denied).",
-        "A principal without admin role is blocked and sees the existing Access Denied screen.",
-        "The role check does not rely on comparing `UserRole` to the string literal 'admin' if the backend returns a variant/union type; the check works with the actual returned shape from the generated candid types."
+        "On initial load (and when navigating), the frontend checks backend system status and detects decommission mode",
+        "If decommission mode is ON, the app renders only the decommissioned screen regardless of URL hash/route",
+        "The decommissioned screen contains only English user-facing text and does not expose any admin/member functionality (no login actions)",
+        "The decommissioned screen renders without relying on protected APIs that will be blocked in decommission mode (i.e., it must not crash due to blocked feature calls)"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/userRole.ts",
+          "path": "frontend/src/pages/DecommissionedPage.tsx",
           "operation": "create",
-          "description": "Add a small role-normalization helper that safely interprets the `UserRole` value returned from the backend (handling enum/variant-like shapes defensively) and exposes a boolean `isAdminRole(...)` (and optionally a `toRoleLabel(...)`) for consistent checks across the UI."
+          "description": "Create a dedicated full-page “Website Decommissioned” view containing only English informational text (no login buttons, no navigation actions, no member/admin features). Use existing shadcn-ui components (e.g., Card/Button typography primitives as needed) for consistent styling; verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/admin/AdminRouteGuard.tsx",
-          "operation": "modify",
-          "description": "Update the admin role gating to use the shared role-normalization helper (e.g., `isAdminRole(role)`) instead of `role !== 'admin'`, ensuring authenticated admins render children and non-admins still see `AccessDeniedView`. Use existing shadcn/ui Card/Button patterns where needed; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/dashboard/DashboardNavbar.tsx",
-          "operation": "modify",
-          "description": "Update role display/labeling logic to use the shared role-normalization helper instead of comparing `role` to string literals, preventing mismatches in admin/user/guest labeling. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-54",
-      "summary": "Show a clear, non-blank failure state when the admin role query fails, with Retry and Back to Home actions.",
-      "acceptanceCriteria": [
-        "If the role query errors, the admin route guard shows an error card (English text) with a Retry button that refetches the role query and a Back to Home button.",
-        "The page never becomes completely blank due to admin-auth query errors or unexpected role values."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/admin/AdminAuthErrorView.tsx",
+          "path": "frontend/src/hooks/useSystemStatus.ts",
           "operation": "create",
-          "description": "Create a reusable admin-auth error view that renders an English error message in a card and provides two actions: Retry (calls a passed `onRetry`) and Back to Home (calls `onNavigate('home')`). Build the UI using existing shadcn/ui components (Card/Button/Alert as appropriate); verify the component's usage instructions before implementing."
+          "description": "Add a React Query hook that uses the existing core-infrastructure actor setup (via useActor) to fetch a minimal system status with an isDecommissioned flag, and returns a safe default (not decommissioned) if the status call is unavailable or fails. This hook must avoid calling any protected/feature APIs so it remains functional during decommission mode; verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/admin/AdminRouteGuard.tsx",
+          "path": "frontend/src/backend.d.ts",
           "operation": "modify",
-          "description": "Handle role-query failures by rendering the new `AdminAuthErrorView` when the role query is in an error state; wire the Retry button to `refetch()` from `useGetCallerRole()` and Back to Home to existing navigation. Also ensure unexpected/unknown role values fall back to a visible non-blank state (AccessDenied or error view as appropriate). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/admin/useAdminAuth.ts",
-          "operation": "modify",
-          "description": "Ensure the `useGetCallerRole()` hook exposes the query error state and a refetch capability to support the AdminRouteGuard Retry action (keep `retry: false` so the UI controls retries explicitly)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-55",
-      "summary": "Add clear in-app navigation to reach Admin Login and ensure successful admin sign-in lands on Admin Dashboard with admin sidebar options available.",
-      "acceptanceCriteria": [
-        "From the Home page UI, there is a visible way to open the Admin Login screen using existing `onNavigate` navigation (English label).",
-        "From Admin Login, successful sign-in navigates to the Admin Dashboard and the sidebar menu with admin options is visible on desktop and accessible on mobile via the existing toggle button."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Add a visible Home page navigation action labeled in English (e.g., \"Admin Login\") that uses existing `onNavigate('admin-login')`. Update the `HomePageProps` `onNavigate` type to include admin pages so the call is type-safe. Verify the component's usage instructions before implementing."
+          "description": "Extend the frontend backend interface typings to include the minimal read-only system status capability used by the decommission check (e.g., a getSystemStatus() returning an object containing isDecommissioned). Keep it read-only and minimal to support the route override; verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Align page-type wiring so Home can navigate to `admin-login` (and any necessary type adjustments) without breaking existing navigation. Ensure `admin-login` continues to render `AdminLoginPage` and `admin-dashboard` renders `AdminDashboardPage`."
+          "description": "Wire the decommission check into the root app: call the new useSystemStatus hook on initial load and ensure it re-checks on hash-route changes, then override renderPage to always render DecommissionedPage when isDecommissioned is true (regardless of current URL hash). Ensure normal pages are not mounted in decommission mode to prevent crashes from blocked feature calls; verify the component's usage instructions before implementing."
         }
       ]
     }

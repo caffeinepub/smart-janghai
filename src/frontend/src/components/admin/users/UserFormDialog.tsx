@@ -4,8 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FormErrorText from '../common/FormErrorText';
 import { Loader2 } from 'lucide-react';
+import { UserRole } from '@/backend';
 import type { User } from '@/backend';
 
 interface UserFormDialogProps {
@@ -18,6 +20,8 @@ export default function UserFormDialog({ open, onOpenChange, user }: UserFormDia
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
+  const [targetUserId, setTargetUserId] = useState('');
+  const [role, setRole] = useState<UserRole>(UserRole.user);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const createMutation = useCreateUser();
@@ -28,10 +32,14 @@ export default function UserFormDialog({ open, onOpenChange, user }: UserFormDia
       setName(user.name);
       setMobile(user.mobile);
       setEmail(user.email);
+      setTargetUserId('');
+      setRole(user.role);
     } else {
       setName('');
       setMobile('');
       setEmail('');
+      setTargetUserId('');
+      setRole(UserRole.user);
     }
     setErrors({});
   }, [user, open]);
@@ -42,6 +50,12 @@ export default function UserFormDialog({ open, onOpenChange, user }: UserFormDia
     if (!mobile.trim()) newErrors.mobile = 'Mobile is required';
     if (!email.trim()) newErrors.email = 'Email is required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Invalid email format';
+    
+    // For new users, require target principal ID
+    if (!user && !targetUserId.trim()) {
+      newErrors.targetUserId = 'Principal ID is required for new users';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -59,7 +73,13 @@ export default function UserFormDialog({ open, onOpenChange, user }: UserFormDia
           email,
         });
       } else {
-        await createMutation.mutateAsync({ name, mobile, email });
+        await createMutation.mutateAsync({ 
+          targetUserId,
+          name, 
+          mobile, 
+          email,
+          role,
+        });
       }
       onOpenChange(false);
     } catch (error: any) {
@@ -71,11 +91,25 @@ export default function UserFormDialog({ open, onOpenChange, user }: UserFormDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{user ? 'Edit User' : 'Create User'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {!user && (
+            <div className="space-y-2">
+              <Label htmlFor="targetUserId">Principal ID *</Label>
+              <Input
+                id="targetUserId"
+                value={targetUserId}
+                onChange={(e) => setTargetUserId(e.target.value)}
+                placeholder="Enter user's principal ID"
+                disabled={isPending}
+              />
+              <FormErrorText error={errors.targetUserId} />
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="name">Name *</Label>
             <Input
@@ -112,6 +146,22 @@ export default function UserFormDialog({ open, onOpenChange, user }: UserFormDia
             />
             <FormErrorText error={errors.email} />
           </div>
+
+          {!user && (
+            <div className="space-y-2">
+              <Label htmlFor="role">Role *</Label>
+              <Select value={role} onValueChange={(value) => setRole(value as UserRole)} disabled={isPending}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={UserRole.user}>User</SelectItem>
+                  <SelectItem value={UserRole.admin}>Admin</SelectItem>
+                  <SelectItem value={UserRole.guest}>Guest</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {errors.submit && <FormErrorText error={errors.submit} />}
 

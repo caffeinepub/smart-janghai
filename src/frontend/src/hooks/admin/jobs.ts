@@ -12,6 +12,7 @@ export function useGetAllJobs() {
       return actor.getAllJobs();
     },
     enabled: !!actor && !actorFetching,
+    refetchInterval: 60000, // Refetch every minute to update expiry status
   });
 }
 

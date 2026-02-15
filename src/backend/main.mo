@@ -1,8 +1,5 @@
-import Map "mo:core/Map";
 import Array "mo:core/Array";
-import Text "mo:core/Text";
-import Iter "mo:core/Iter";
-import Nat "mo:core/Nat";
+import Map "mo:core/Map";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
@@ -10,7 +7,9 @@ import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   type Time = Time.Time;
   type Principal = Principal.Principal;
@@ -119,6 +118,8 @@ actor {
     user : Principal;
   };
 
+  var decommissioned : Bool = false;
+
   let users = Map.empty<Principal, User>();
   let news = Map.empty<NewsId, News>();
   let schemes = Map.empty<SchemeId, Scheme>();
@@ -158,7 +159,6 @@ actor {
     #userStatusChanged;
     #login;
     #logout;
-    // Add more activity types here as needed
   };
 
   public type AdminActivity = {
@@ -168,37 +168,135 @@ actor {
     details : Text;
   };
 
-  func generateId(prefix : Text, timestamp : Time) : Text {
-    prefix # timestamp.toText();
+  // User Profile Management (required by frontend)
+  public type UserProfile = {
+    name : Text;
+    mobile : Text;
+    email : Text;
   };
 
+  func checkDecommissioned() {
+    if (decommissioned) {
+      Runtime.trap("Service Unavailable: This website has been permanently decommissioned and is no longer available.");
+    };
+  };
+
+  public shared ({ caller }) func decommissionWebsite() : async () {
+    // Do NOT check decommissioned status here - this is the decommission operation itself
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can decommission the website");
+    };
+
+    decommissioned := true;
+    users.clear();
+    news.clear();
+    schemes.clear();
+    jobs.clear();
+    media.clear();
+    notifications.clear();
+    websiteSettings.clear();
+    activityLogs.clear();
+    adminActivities.clear();
+    nextNotificationId := 1;
+    nextActivityLogId := 1;
+  };
+
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    checkDecommissioned();
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can access profiles");
+    };
+    switch (users.get(caller)) {
+      case (null) { null };
+      case (?user) {
+        ?{
+          name = user.name;
+          mobile = user.mobile;
+          email = user.email;
+        };
+      };
+    };
+  };
+
+  public query ({ caller }) func getUserProfile(userId : Principal) : async ?UserProfile {
+    checkDecommissioned();
+    if (caller != userId and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    switch (users.get(userId)) {
+      case (null) { null };
+      case (?user) {
+        ?{
+          name = user.name;
+          mobile = user.mobile;
+          email = user.email;
+        };
+      };
+    };
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    checkDecommissioned();
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
+    };
+    switch (users.get(caller)) {
+      case (null) {
+        let user : User = {
+          id = caller;
+          name = profile.name;
+          mobile = profile.mobile;
+          email = profile.email;
+          role = AccessControl.getUserRole(accessControlState, caller);
+          status = #active;
+          registrationDate = Time.now();
+        };
+        users.add(caller, user);
+      };
+      case (?existingUser) {
+        let updatedUser : User = {
+          existingUser with
+          name = profile.name;
+          mobile = profile.mobile;
+          email = profile.email;
+        };
+        users.add(caller, updatedUser);
+      };
+    };
+  };
+
+  // User Management (Admin CRUD)
   public query ({ caller }) func getUser(id : Principal) : async ?User {
-    if (caller != id and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can access other users");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can access user details");
     };
     users.get(id);
   };
 
-  public shared ({ caller }) func createUser(name : Text, mobile : Text, email : Text) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admins can create users.");
+  public shared ({ caller }) func createUser(targetUserId : Principal, name : Text, mobile : Text, email : Text, role : UserRole) : async () {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create users");
     };
 
     let user : User = {
-      id = caller;
+      id = targetUserId;
       name;
       mobile;
       email;
-      role = #user;
+      role;
       status = #active;
       registrationDate = Time.now();
     };
-    users.add(caller, user);
+    users.add(targetUserId, user);
+    AccessControl.assignRole(accessControlState, caller, targetUserId, role);
   };
 
   public shared ({ caller }) func updateUser(id : Principal, name : Text, mobile : Text, email : Text) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admins can update users.");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update users");
     };
 
     switch (users.get(id)) {
@@ -210,9 +308,22 @@ actor {
     };
   };
 
+  public shared ({ caller }) func deleteUser(id : Principal) : async () {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can delete users");
+    };
+
+    switch (users.get(id)) {
+      case (null) { Runtime.trap("User not found") };
+      case (?_) { users.remove(id) };
+    };
+  };
+
   public shared ({ caller }) func setUserStatus(id : Principal, status : UserStatus) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only authorized users can change status");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can change user status");
     };
 
     switch (users.get(id)) {
@@ -224,15 +335,17 @@ actor {
     };
   };
 
-  public shared ({ caller }) func assignUserRole(id : Principal, role : AccessControl.UserRole) : async () {
+  public shared ({ caller }) func assignUserRole(id : Principal, role : UserRole) : async () {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can assign roles");
+    };
+
     switch (users.get(id)) {
       case (null) {
         Runtime.trap("User not found");
       };
       case (?user) {
-        if (not AccessControl.hasPermission(accessControlState, caller, role)) {
-          Runtime.trap("Unauthorized: Only " # debugRole(role) # " can assign this role");
-        };
         AccessControl.assignRole(accessControlState, caller, id, role);
         let updatedUser : User = { user with role };
         users.add(id, updatedUser);
@@ -240,24 +353,19 @@ actor {
     };
   };
 
-  func debugRole(role : AccessControl.UserRole) : Text {
-    switch (role) {
-      case (#admin) { "admin" };
-      case (#user) { "user" };
-      case (#guest) { "guest" };
-    };
-  };
-
   public query ({ caller }) func getAllUsers() : async [User] {
+    checkDecommissioned();
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can view all users");
     };
     users.values().toArray();
   };
 
+  // News Management (Admin CRUD)
   public shared ({ caller }) func createNews(title : Text, description : Text, category : Text, tags : [Text], featuredImage : ?MediaId) : async NewsId {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin and above can create news");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create news");
     };
 
     let id = generateId("news_", Time.now());
@@ -269,7 +377,7 @@ actor {
       category;
       tags;
       publishDate = Time.now();
-      status = #draft; // explicit tag
+      status = #draft;
       scheduledPublishTime = null;
       featuredImage;
     };
@@ -278,8 +386,9 @@ actor {
   };
 
   public shared ({ caller }) func updateNews(id : NewsId, title : Text, description : Text, category : Text, tags : [Text], featuredImage : ?MediaId) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin and above can update news");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update news");
     };
 
     switch (news.get(id)) {
@@ -292,22 +401,24 @@ actor {
   };
 
   public shared ({ caller }) func publishNews(id : NewsId) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin and above can publish news");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can publish news");
     };
 
     switch (news.get(id)) {
       case (null) { Runtime.trap("News not found") };
       case (?existingNews) {
-        let updatedNews : News = { existingNews with status = #published };
+        let updatedNews : News = { existingNews with status = #published; publishDate = Time.now() };
         news.add(id, updatedNews);
       };
     };
   };
 
   public shared ({ caller }) func deleteNewsItem(id : NewsId) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Only admin and above can delete news");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can delete news");
     };
 
     switch (news.get(id)) {
@@ -317,20 +428,28 @@ actor {
   };
 
   public query ({ caller }) func getAllNews() : async [News] {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view all news");
+    };
     news.values().toArray();
   };
 
   public query ({ caller }) func getAllPublishedNews() : async [News] {
+    checkDecommissioned();
     news.values().toArray().filter(func(newsItem) { newsItem.status == #published });
   };
 
   public query ({ caller }) func getPublishedNewsByCategory(category : Text) : async [News] {
+    checkDecommissioned();
     news.values().toArray().filter(func(n) { n.status == #published and n.category == category });
   };
 
+  // Government Schemes Management (Admin CRUD)
   public shared ({ caller }) func createScheme(name : Text, eligibilityDetails : Text, applyLink : Text, importantDates : Text, documents : [MediaId]) : async SchemeId {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Admin and above required");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create schemes");
     };
 
     let id = generateId("scheme_", Time.now());
@@ -348,8 +467,9 @@ actor {
   };
 
   public shared ({ caller }) func updateScheme(id : SchemeId, name : Text, eligibilityDetails : Text, applyLink : Text, importantDates : Text, documents : [MediaId]) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Admin and above required");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update schemes");
     };
 
     switch (schemes.get(id)) {
@@ -362,7 +482,8 @@ actor {
   };
 
   public shared ({ caller }) func deleteScheme(id : SchemeId) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can delete schemes");
     };
 
@@ -373,19 +494,25 @@ actor {
   };
 
   public query ({ caller }) func getScheme(id : SchemeId) : async ?Scheme {
+    checkDecommissioned();
     schemes.get(id);
   };
 
   public query ({ caller }) func getAllSchemes() : async [Scheme] {
+    checkDecommissioned();
     schemes.values().toArray();
   };
 
+  // Jobs Management (Admin CRUD with auto-expiry)
   public shared ({ caller }) func createJob(companyName : Text, salary : Nat, qualification : Text, applyLink : Text, expiryDate : Time) : async JobId {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Admin and above required");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create jobs");
     };
 
     let id = generateId("job_", Time.now());
+    let now = Time.now();
+    let status = if (expiryDate <= now) { #expired } else { #active };
 
     let newJob : Job = {
       id;
@@ -394,28 +521,32 @@ actor {
       qualification;
       applyLink;
       expiryDate;
-      status = #active;
+      status;
     };
     jobs.add(id, newJob);
     id;
   };
 
   public shared ({ caller }) func updateJob(id : JobId, companyName : Text, salary : Nat, qualification : Text, applyLink : Text, expiryDate : Time) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Admin and above required");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update jobs");
     };
 
     switch (jobs.get(id)) {
       case (null) { Runtime.trap("Job not found") };
       case (?existingJob) {
-        let updatedJob : Job = { existingJob with companyName; salary; qualification; applyLink; expiryDate };
+        let now = Time.now();
+        let status = if (expiryDate <= now) { #expired } else { #active };
+        let updatedJob : Job = { existingJob with companyName; salary; qualification; applyLink; expiryDate; status };
         jobs.add(id, updatedJob);
       };
     };
   };
 
   public shared ({ caller }) func deleteJob(id : JobId) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can delete jobs");
     };
 
@@ -426,8 +557,9 @@ actor {
   };
 
   public shared ({ caller }) func updateJobStatus(id : JobId, status : JobStatus) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Admin and above required");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update job status");
     };
 
     switch (jobs.get(id)) {
@@ -440,18 +572,39 @@ actor {
   };
 
   public query ({ caller }) func getJob(id : JobId) : async ?Job {
+    checkDecommissioned();
+    updateExpiredJobsInternal();
     jobs.get(id);
   };
 
   public query ({ caller }) func getAllJobs() : async [Job] {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view all jobs");
+    };
+    updateExpiredJobsInternal();
     jobs.values().toArray();
   };
 
   public query ({ caller }) func getActiveJobs() : async [Job] {
+    checkDecommissioned();
+    updateExpiredJobsInternal();
     jobs.values().toArray().filter(func(j) { j.status == #active });
   };
 
+  func updateExpiredJobsInternal() {
+    let now = Time.now();
+    for ((id, job) in jobs.entries()) {
+      if (job.status == #active and job.expiryDate <= now) {
+        let expiredJob : Job = { job with status = #expired };
+        jobs.add(id, expiredJob);
+      };
+    };
+  };
+
+  // Media Library Management (Admin CRUD)
   public shared ({ caller }) func uploadMedia(filename : Text, contentType : Text, fileReference : Storage.ExternalBlob, size : Nat) : async MediaId {
+    checkDecommissioned();
     if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
       Runtime.trap("Unauthorized: Must be a user to upload media");
     };
@@ -472,8 +625,9 @@ actor {
   };
 
   public shared ({ caller }) func deleteMedia(id : MediaId) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Admin required");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can delete media");
     };
 
     switch (media.get(id)) {
@@ -482,39 +636,58 @@ actor {
     };
   };
 
+  public query ({ caller }) func getMedia(id : MediaId) : async ?Media {
+    checkDecommissioned();
+    media.get(id);
+  };
+
   public query ({ caller }) func getAllMedia() : async [Media] {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Admin required");
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view all media");
     };
     media.values().toArray();
   };
 
   public query ({ caller }) func searchMediaByType(contentType : Text) : async [Media] {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can search media");
+    };
     media.values().toArray().filter(func(m) { m.contentType == contentType });
   };
 
-  public shared ({ caller }) func createNotification(message : Text, recipients : [Principal], timestamp : Time) : async () {
-    if (not AccessControl.hasPermission(accessControlState, caller, #admin)) {
-      Runtime.trap("Unauthorized: Admin only");
+  // Notifications Management
+  public shared ({ caller }) func createNotification(message : Text, recipients : [Principal]) : async NotificationId {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create notifications");
     };
 
     let notification : Notification = {
       id = nextNotificationId;
       message;
       recipients;
-      timestamp;
-      delivered = false;
+      timestamp = Time.now();
+      delivered = true;
       read = false;
     };
 
     notifications.add(nextNotificationId, notification);
+    let notifId = nextNotificationId;
     nextNotificationId += 1;
+    notifId;
   };
 
   public shared ({ caller }) func markNotificationRead(notifId : NotificationId) : async () {
+    checkDecommissioned();
     switch (notifications.get(notifId)) {
       case (null) { Runtime.trap("Notification not found") };
       case (?existingNotif) {
+        let isRecipient = existingNotif.recipients.findIndex(func(recipient) { recipient == caller }) != null;
+        if (not isRecipient and not AccessControl.isAdmin(accessControlState, caller)) {
+          Runtime.trap("Unauthorized: Can only mark your own notifications as read");
+        };
         let updatedNotification : Notification = { existingNotif with read = true };
         notifications.add(notifId, updatedNotification);
       };
@@ -522,22 +695,130 @@ actor {
   };
 
   public query ({ caller }) func getNotificationsForUser(userId : UserId) : async [Notification] {
+    checkDecommissioned();
+    if (caller != userId and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own notifications");
+    };
     notifications.values().toArray().filter(func(notif) {
       notif.recipients.findIndex(func(recipient) { recipient == userId }) != null;
     });
   };
 
-  public shared ({ caller }) func updateWebsiteSettings(settings : WebsiteSettings) : async () {
+  public query ({ caller }) func getAllNotifications() : async [Notification] {
+    checkDecommissioned();
     if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Admin only");
+      Runtime.trap("Unauthorized: Only admins can view all notifications");
+    };
+    notifications.values().toArray();
+  };
+
+  // Website Settings Management
+  public shared ({ caller }) func updateWebsiteSettings(settings : WebsiteSettings) : async () {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update website settings");
     };
     websiteSettings.add((settings.id), settings);
   };
 
   public query ({ caller }) func getWebsiteSettings(id : SettingsId) : async ?WebsiteSettings {
+    checkDecommissioned();
     websiteSettings.get(id);
   };
 
+  // Dashboard Analytics and Metrics
+  public type DashboardMetrics = {
+    totalUsers : Nat;
+    totalNews : Nat;
+    totalJobs : Nat;
+    totalSchemes : Nat;
+    activeJobs : Nat;
+    publishedNews : Nat;
+    totalMedia : Nat;
+    totalNotifications : Nat;
+  };
+
+  public type MonthlyGrowth = {
+    month : Text;
+    users : Nat;
+    news : Nat;
+    jobs : Nat;
+  };
+
+  public type RecentActivity = {
+    timestamp : Time;
+    activityType : ActivityType;
+    details : Text;
+    user : Principal;
+  };
+
+  public query ({ caller }) func getDashboardMetrics() : async DashboardMetrics {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view dashboard metrics");
+    };
+
+    updateExpiredJobsInternal();
+
+    let activeJobsCount = jobs.values().toArray().filter(func(j) { j.status == #active }).size();
+    let publishedNewsCount = news.values().toArray().filter(func(n) { n.status == #published }).size();
+
+    {
+      totalUsers = users.size();
+      totalNews = news.size();
+      totalJobs = jobs.size();
+      totalSchemes = schemes.size();
+      activeJobs = activeJobsCount;
+      publishedNews = publishedNewsCount;
+      totalMedia = media.size();
+      totalNotifications = notifications.size();
+    };
+  };
+
+  public query ({ caller }) func getRecentActivity(limit : Nat) : async [RecentActivity] {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view recent activity");
+    };
+
+    let activities = adminActivities.values().toArray();
+    let sorted = activities.sort(
+      func(a : AdminActivity, b : AdminActivity) : { #less; #equal; #greater } {
+        if (a.time > b.time) { #less } else if (a.time < b.time) { #greater } else { #equal };
+      },
+    );
+
+    let limitedActivities = if (sorted.size() > limit) {
+      sorted.sliceToArray(0, limit);
+    } else {
+      sorted;
+    };
+
+    limitedActivities.map(
+      func(a : AdminActivity) : RecentActivity {
+        {
+          timestamp = a.time;
+          activityType = a.activityType;
+          details = a.details;
+          user = a.principal;
+        };
+      }
+    );
+  };
+
+  public query ({ caller }) func getMonthlyGrowth(months : Nat) : async [MonthlyGrowth] {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view growth metrics");
+    };
+
+    // Simplified implementation - returns placeholder data
+    // In production, this would aggregate data by month from timestamps
+    let result : [MonthlyGrowth] = [];
+    result;
+  };
+
+  // Backup and Export
   public type ReportType = {
     #userGrowth;
     #newsViews;
@@ -560,8 +841,9 @@ actor {
     nextNotificationId : Nat;
     nextActivityLogId : Nat;
   } {
+    checkDecommissioned();
     if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Admin only");
+      Runtime.trap("Unauthorized: Only admins can export backups");
     };
     {
       users = users.toArray();
@@ -577,9 +859,11 @@ actor {
     };
   };
 
+  // Activity Logging
   public shared ({ caller }) func recordActivity(activity : ActivityLog) : async () {
+    checkDecommissioned();
     if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Admin privilege required");
+      Runtime.trap("Unauthorized: Only admins can record activity");
     };
     activityLogs.add(activity.id, activity);
     nextActivityLogId += 1;
@@ -588,8 +872,9 @@ actor {
   let adminActivities = Map.empty<Nat, AdminActivity>();
 
   public shared ({ caller }) func recordAdminActivity(activityType : ActivityType, details : Text) : async () {
+    checkDecommissioned();
     if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admin can perform this action");
+      Runtime.trap("Unauthorized: Only admins can record admin activity");
     };
     let now = Time.now();
     let activity : AdminActivity = {
@@ -603,16 +888,22 @@ actor {
   };
 
   public query ({ caller }) func getAdminActivityLog() : async [AdminActivity] {
+    checkDecommissioned();
     if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admin can perform this action");
+      Runtime.trap("Unauthorized: Only admins can view activity log");
     };
     adminActivities.values().toArray();
   };
 
   public query ({ caller }) func getAllAdminActivities() : async [AdminActivity] {
+    checkDecommissioned();
     if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admin can perform this action");
+      Runtime.trap("Unauthorized: Only admins can view all activities");
     };
     adminActivities.values().toArray();
+  };
+
+  func generateId(prefix : Text, timestamp : Time) : Text {
+    prefix # timestamp.toText();
   };
 };

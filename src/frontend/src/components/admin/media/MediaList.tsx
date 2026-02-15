@@ -6,21 +6,30 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Eye, Trash2, Download } from 'lucide-react';
+import { Search, Eye, Trash2 } from 'lucide-react';
 import type { Media } from '@/backend';
 
 export default function MediaList() {
   const { data: media, isLoading } = useGetAllMedia();
   const deleteMutation = useDeleteMedia();
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'images' | 'pdfs'>('all');
   const [previewMedia, setPreviewMedia] = useState<Media | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Media | null>(null);
 
-  const filteredMedia = media?.filter((item) =>
-    item.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.contentType.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredMedia = media?.filter((item) => {
+    const matchesSearch = item.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.contentType.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (filterType === 'images') {
+      return matchesSearch && item.contentType.startsWith('image/');
+    } else if (filterType === 'pdfs') {
+      return matchesSearch && item.contentType === 'application/pdf';
+    }
+    return matchesSearch;
+  }) || [];
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -47,15 +56,24 @@ export default function MediaList() {
     <>
       <Card>
         <CardContent className="pt-6 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search media by filename or type..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search media by filename or type..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Tabs value={filterType} onValueChange={(v) => setFilterType(v as typeof filterType)}>
+              <TabsList>
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="images">Images</TabsTrigger>
+                <TabsTrigger value="pdfs">PDFs</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           {filteredMedia.length === 0 ? (

@@ -2,7 +2,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Edit } from 'lucide-react';
+import { useAssignUserRole } from '@/hooks/admin/users';
+import { UserRole, UserStatus } from '@/backend';
 import type { User } from '@/backend';
 
 interface UserDetailsDrawerProps {
@@ -13,9 +17,18 @@ interface UserDetailsDrawerProps {
 }
 
 export default function UserDetailsDrawer({ user, open, onOpenChange, onEdit }: UserDetailsDrawerProps) {
+  const assignRoleMutation = useAssignUserRole();
+
   if (!user) return null;
 
   const registrationDate = new Date(Number(user.registrationDate) / 1000000).toLocaleDateString();
+
+  const handleRoleChange = async (newRole: UserRole) => {
+    await assignRoleMutation.mutateAsync({
+      id: user.id.toString(),
+      role: newRole,
+    });
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -43,16 +56,27 @@ export default function UserDetailsDrawer({ user, open, onOpenChange, onEdit }: 
 
           <Separator />
 
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground">Role</h3>
-            <Badge variant="outline" className="mt-1 capitalize">
-              {user.role}
-            </Badge>
+          <div className="space-y-2">
+            <Label htmlFor="role-select">Role</Label>
+            <Select 
+              value={user.role} 
+              onValueChange={(value) => handleRoleChange(value as UserRole)}
+              disabled={assignRoleMutation.isPending}
+            >
+              <SelectTrigger id="role-select">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={UserRole.admin}>Admin</SelectItem>
+                <SelectItem value={UserRole.user}>User</SelectItem>
+                <SelectItem value={UserRole.guest}>Guest</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
             <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-            <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="mt-1 capitalize">
+            <Badge variant={user.status === UserStatus.active ? 'default' : 'secondary'} className="mt-1 capitalize">
               {user.status}
             </Badge>
           </div>

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { JobStatus } from '@/backend';
 import type { Job } from '@/backend';
 
 interface JobsListProps {
@@ -19,9 +20,9 @@ export default function JobsList({ onEdit }: JobsListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Job | null>(null);
 
-  const filteredJobs = jobs?.filter((item) =>
-    item.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.qualification.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredJobs = jobs?.filter((job) =>
+    job.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.qualification.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   const handleDelete = async () => {
@@ -30,35 +31,46 @@ export default function JobsList({ onEdit }: JobsListProps) {
     setDeleteTarget(null);
   };
 
+  const formatDate = (timestamp: bigint) => {
+    return new Date(Number(timestamp) / 1000000).toLocaleDateString();
+  };
+
   const columns = [
     {
       header: 'Company',
-      accessor: (item: Job) => <span className="font-medium">{item.companyName}</span>,
+      accessor: (job: Job) => <span className="font-medium">{job.companyName}</span>,
     },
     {
       header: 'Qualification',
-      accessor: (item: Job) => <span className="text-sm">{item.qualification}</span>,
+      accessor: (job: Job) => <span className="text-sm">{job.qualification}</span>,
     },
     {
       header: 'Salary',
-      accessor: (item: Job) => <span className="text-sm">₹{item.salary.toString()}</span>,
+      accessor: (job: Job) => <span className="text-sm">₹{job.salary.toString()}</span>,
+    },
+    {
+      header: 'Expiry Date',
+      accessor: (job: Job) => <span className="text-sm">{formatDate(job.expiryDate)}</span>,
     },
     {
       header: 'Status',
-      accessor: (item: Job) => (
-        <Badge variant={item.status === 'active' ? 'default' : 'secondary'} className="capitalize">
-          {item.status}
+      accessor: (job: Job) => (
+        <Badge 
+          variant={job.status === JobStatus.active ? 'default' : 'secondary'} 
+          className="capitalize"
+        >
+          {job.status}
         </Badge>
       ),
     },
     {
       header: 'Actions',
-      accessor: (item: Job) => (
+      accessor: (job: Job) => (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => onEdit(item)}>
+          <Button variant="ghost" size="sm" onClick={() => onEdit(job)}>
             <Edit className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(item)}>
+          <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(job)}>
             <Trash2 className="w-4 h-4 text-destructive" />
           </Button>
         </div>

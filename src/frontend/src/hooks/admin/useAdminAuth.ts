@@ -12,7 +12,8 @@ export function useGetCallerRole() {
       return actor.getCallerUserRole();
     },
     enabled: !!actor && !actorFetching,
-    retry: false,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   return {
@@ -25,13 +26,20 @@ export function useGetCallerRole() {
 export function useIsCallerAdmin() {
   const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<boolean>({
+  const query = useQuery<boolean>({
     queryKey: ['isCallerAdmin'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       return actor.isCallerAdmin();
     },
     enabled: !!actor && !actorFetching,
-    retry: false,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }

@@ -29,6 +29,7 @@ export const Time = IDL.Int;
 export const JobId = IDL.Text;
 export const MediaId = IDL.Text;
 export const NewsId = IDL.Text;
+export const NotificationId = IDL.Nat;
 export const SchemeId = IDL.Text;
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const Media = IDL.Record({
@@ -47,7 +48,6 @@ export const ActivityLog = IDL.Record({
   'user' : Principal,
   'timestamp' : Time,
 });
-export const NotificationId = IDL.Nat;
 export const Notification = IDL.Record({
   'id' : NotificationId,
   'read' : IDL.Bool,
@@ -147,7 +147,34 @@ export const AdminActivity = IDL.Record({
   'time' : Time,
   'details' : IDL.Text,
 });
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Text,
+  'mobile' : IDL.Text,
+});
+export const DashboardMetrics = IDL.Record({
+  'totalMedia' : IDL.Nat,
+  'totalSchemes' : IDL.Nat,
+  'publishedNews' : IDL.Nat,
+  'totalJobs' : IDL.Nat,
+  'totalNews' : IDL.Nat,
+  'totalNotifications' : IDL.Nat,
+  'totalUsers' : IDL.Nat,
+  'activeJobs' : IDL.Nat,
+});
+export const MonthlyGrowth = IDL.Record({
+  'month' : IDL.Text,
+  'jobs' : IDL.Nat,
+  'news' : IDL.Nat,
+  'users' : IDL.Nat,
+});
 export const UserId = IDL.Principal;
+export const RecentActivity = IDL.Record({
+  'activityType' : ActivityType,
+  'user' : Principal,
+  'timestamp' : Time,
+  'details' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -189,17 +216,27 @@ export const idlService = IDL.Service({
       [NewsId],
       [],
     ),
-  'createNotification' : IDL.Func([IDL.Text, IDL.Vec(Principal), Time], [], []),
+  'createNotification' : IDL.Func(
+      [IDL.Text, IDL.Vec(Principal)],
+      [NotificationId],
+      [],
+    ),
   'createScheme' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(MediaId)],
       [SchemeId],
       [],
     ),
-  'createUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+  'createUser' : IDL.Func(
+      [Principal, IDL.Text, IDL.Text, IDL.Text, UserRole],
+      [],
+      [],
+    ),
+  'decommissionWebsite' : IDL.Func([], [], []),
   'deleteJob' : IDL.Func([JobId], [], []),
   'deleteMedia' : IDL.Func([MediaId], [], []),
   'deleteNewsItem' : IDL.Func([NewsId], [], []),
   'deleteScheme' : IDL.Func([SchemeId], [], []),
+  'deleteUser' : IDL.Func([Principal], [], []),
   'exportBackup' : IDL.Func(
       [],
       [
@@ -224,11 +261,16 @@ export const idlService = IDL.Service({
   'getAllJobs' : IDL.Func([], [IDL.Vec(Job)], ['query']),
   'getAllMedia' : IDL.Func([], [IDL.Vec(Media)], ['query']),
   'getAllNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
+  'getAllNotifications' : IDL.Func([], [IDL.Vec(Notification)], ['query']),
   'getAllPublishedNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
   'getAllSchemes' : IDL.Func([], [IDL.Vec(Scheme)], ['query']),
   'getAllUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getDashboardMetrics' : IDL.Func([], [DashboardMetrics], ['query']),
   'getJob' : IDL.Func([JobId], [IDL.Opt(Job)], ['query']),
+  'getMedia' : IDL.Func([MediaId], [IDL.Opt(Media)], ['query']),
+  'getMonthlyGrowth' : IDL.Func([IDL.Nat], [IDL.Vec(MonthlyGrowth)], ['query']),
   'getNotificationsForUser' : IDL.Func(
       [UserId],
       [IDL.Vec(Notification)],
@@ -239,8 +281,14 @@ export const idlService = IDL.Service({
       [IDL.Vec(News)],
       ['query'],
     ),
+  'getRecentActivity' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Vec(RecentActivity)],
+      ['query'],
+    ),
   'getScheme' : IDL.Func([SchemeId], [IDL.Opt(Scheme)], ['query']),
   'getUser' : IDL.Func([Principal], [IDL.Opt(User)], ['query']),
+  'getUserProfile' : IDL.Func([Principal], [IDL.Opt(UserProfile)], ['query']),
   'getWebsiteSettings' : IDL.Func(
       [SettingsId],
       [IDL.Opt(WebsiteSettings)],
@@ -251,6 +299,7 @@ export const idlService = IDL.Service({
   'publishNews' : IDL.Func([NewsId], [], []),
   'recordActivity' : IDL.Func([ActivityLog], [], []),
   'recordAdminActivity' : IDL.Func([ActivityType, IDL.Text], [], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'searchMediaByType' : IDL.Func([IDL.Text], [IDL.Vec(Media)], ['query']),
   'setUserStatus' : IDL.Func([Principal, UserStatus], [], []),
   'updateJob' : IDL.Func(
@@ -309,6 +358,7 @@ export const idlFactory = ({ IDL }) => {
   const JobId = IDL.Text;
   const MediaId = IDL.Text;
   const NewsId = IDL.Text;
+  const NotificationId = IDL.Nat;
   const SchemeId = IDL.Text;
   const ExternalBlob = IDL.Vec(IDL.Nat8);
   const Media = IDL.Record({
@@ -327,7 +377,6 @@ export const idlFactory = ({ IDL }) => {
     'user' : Principal,
     'timestamp' : Time,
   });
-  const NotificationId = IDL.Nat;
   const Notification = IDL.Record({
     'id' : NotificationId,
     'read' : IDL.Bool,
@@ -424,7 +473,34 @@ export const idlFactory = ({ IDL }) => {
     'time' : Time,
     'details' : IDL.Text,
   });
+  const UserProfile = IDL.Record({
+    'name' : IDL.Text,
+    'email' : IDL.Text,
+    'mobile' : IDL.Text,
+  });
+  const DashboardMetrics = IDL.Record({
+    'totalMedia' : IDL.Nat,
+    'totalSchemes' : IDL.Nat,
+    'publishedNews' : IDL.Nat,
+    'totalJobs' : IDL.Nat,
+    'totalNews' : IDL.Nat,
+    'totalNotifications' : IDL.Nat,
+    'totalUsers' : IDL.Nat,
+    'activeJobs' : IDL.Nat,
+  });
+  const MonthlyGrowth = IDL.Record({
+    'month' : IDL.Text,
+    'jobs' : IDL.Nat,
+    'news' : IDL.Nat,
+    'users' : IDL.Nat,
+  });
   const UserId = IDL.Principal;
+  const RecentActivity = IDL.Record({
+    'activityType' : ActivityType,
+    'user' : Principal,
+    'timestamp' : Time,
+    'details' : IDL.Text,
+  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -467,8 +543,8 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'createNotification' : IDL.Func(
-        [IDL.Text, IDL.Vec(Principal), Time],
-        [],
+        [IDL.Text, IDL.Vec(Principal)],
+        [NotificationId],
         [],
       ),
     'createScheme' : IDL.Func(
@@ -476,11 +552,17 @@ export const idlFactory = ({ IDL }) => {
         [SchemeId],
         [],
       ),
-    'createUser' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
+    'createUser' : IDL.Func(
+        [Principal, IDL.Text, IDL.Text, IDL.Text, UserRole],
+        [],
+        [],
+      ),
+    'decommissionWebsite' : IDL.Func([], [], []),
     'deleteJob' : IDL.Func([JobId], [], []),
     'deleteMedia' : IDL.Func([MediaId], [], []),
     'deleteNewsItem' : IDL.Func([NewsId], [], []),
     'deleteScheme' : IDL.Func([SchemeId], [], []),
+    'deleteUser' : IDL.Func([Principal], [], []),
     'exportBackup' : IDL.Func(
         [],
         [
@@ -505,11 +587,20 @@ export const idlFactory = ({ IDL }) => {
     'getAllJobs' : IDL.Func([], [IDL.Vec(Job)], ['query']),
     'getAllMedia' : IDL.Func([], [IDL.Vec(Media)], ['query']),
     'getAllNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
+    'getAllNotifications' : IDL.Func([], [IDL.Vec(Notification)], ['query']),
     'getAllPublishedNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
     'getAllSchemes' : IDL.Func([], [IDL.Vec(Scheme)], ['query']),
     'getAllUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getDashboardMetrics' : IDL.Func([], [DashboardMetrics], ['query']),
     'getJob' : IDL.Func([JobId], [IDL.Opt(Job)], ['query']),
+    'getMedia' : IDL.Func([MediaId], [IDL.Opt(Media)], ['query']),
+    'getMonthlyGrowth' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(MonthlyGrowth)],
+        ['query'],
+      ),
     'getNotificationsForUser' : IDL.Func(
         [UserId],
         [IDL.Vec(Notification)],
@@ -520,8 +611,14 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(News)],
         ['query'],
       ),
+    'getRecentActivity' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(RecentActivity)],
+        ['query'],
+      ),
     'getScheme' : IDL.Func([SchemeId], [IDL.Opt(Scheme)], ['query']),
     'getUser' : IDL.Func([Principal], [IDL.Opt(User)], ['query']),
+    'getUserProfile' : IDL.Func([Principal], [IDL.Opt(UserProfile)], ['query']),
     'getWebsiteSettings' : IDL.Func(
         [SettingsId],
         [IDL.Opt(WebsiteSettings)],
@@ -532,6 +629,7 @@ export const idlFactory = ({ IDL }) => {
     'publishNews' : IDL.Func([NewsId], [], []),
     'recordActivity' : IDL.Func([ActivityLog], [], []),
     'recordAdminActivity' : IDL.Func([ActivityType, IDL.Text], [], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'searchMediaByType' : IDL.Func([IDL.Text], [IDL.Vec(Media)], ['query']),
     'setUserStatus' : IDL.Func([Principal, UserStatus], [], []),
     'updateJob' : IDL.Func(

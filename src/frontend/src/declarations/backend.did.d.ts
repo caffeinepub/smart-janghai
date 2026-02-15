@@ -45,6 +45,16 @@ export interface AdminActivity {
   'time' : Time,
   'details' : string,
 }
+export interface DashboardMetrics {
+  'totalMedia' : bigint,
+  'totalSchemes' : bigint,
+  'publishedNews' : bigint,
+  'totalJobs' : bigint,
+  'totalNews' : bigint,
+  'totalNotifications' : bigint,
+  'totalUsers' : bigint,
+  'activeJobs' : bigint,
+}
 export type ExternalBlob = Uint8Array;
 export interface Job {
   'id' : JobId,
@@ -68,6 +78,12 @@ export interface Media {
   'fileReference' : ExternalBlob,
 }
 export type MediaId = string;
+export interface MonthlyGrowth {
+  'month' : string,
+  'jobs' : bigint,
+  'news' : bigint,
+  'users' : bigint,
+}
 export interface News {
   'id' : NewsId,
   'status' : NewsStatus,
@@ -93,6 +109,12 @@ export interface Notification {
 }
 export type NotificationId = bigint;
 export type Principal = Principal;
+export interface RecentActivity {
+  'activityType' : ActivityType,
+  'user' : Principal,
+  'timestamp' : Time,
+  'details' : string,
+}
 export interface Scheme {
   'id' : SchemeId,
   'documents' : Array<MediaId>,
@@ -114,6 +136,11 @@ export interface User {
   'registrationDate' : Time,
 }
 export type UserId = Principal;
+export interface UserProfile {
+  'name' : string,
+  'email' : string,
+  'mobile' : string,
+}
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -165,18 +192,23 @@ export interface _SERVICE {
     NewsId
   >,
   'createNotification' : ActorMethod<
-    [string, Array<Principal>, Time],
-    undefined
+    [string, Array<Principal>],
+    NotificationId
   >,
   'createScheme' : ActorMethod<
     [string, string, string, string, Array<MediaId>],
     SchemeId
   >,
-  'createUser' : ActorMethod<[string, string, string], undefined>,
+  'createUser' : ActorMethod<
+    [Principal, string, string, string, UserRole],
+    undefined
+  >,
+  'decommissionWebsite' : ActorMethod<[], undefined>,
   'deleteJob' : ActorMethod<[JobId], undefined>,
   'deleteMedia' : ActorMethod<[MediaId], undefined>,
   'deleteNewsItem' : ActorMethod<[NewsId], undefined>,
   'deleteScheme' : ActorMethod<[SchemeId], undefined>,
+  'deleteUser' : ActorMethod<[Principal], undefined>,
   'exportBackup' : ActorMethod<
     [],
     {
@@ -198,21 +230,29 @@ export interface _SERVICE {
   'getAllJobs' : ActorMethod<[], Array<Job>>,
   'getAllMedia' : ActorMethod<[], Array<Media>>,
   'getAllNews' : ActorMethod<[], Array<News>>,
+  'getAllNotifications' : ActorMethod<[], Array<Notification>>,
   'getAllPublishedNews' : ActorMethod<[], Array<News>>,
   'getAllSchemes' : ActorMethod<[], Array<Scheme>>,
   'getAllUsers' : ActorMethod<[], Array<User>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getDashboardMetrics' : ActorMethod<[], DashboardMetrics>,
   'getJob' : ActorMethod<[JobId], [] | [Job]>,
+  'getMedia' : ActorMethod<[MediaId], [] | [Media]>,
+  'getMonthlyGrowth' : ActorMethod<[bigint], Array<MonthlyGrowth>>,
   'getNotificationsForUser' : ActorMethod<[UserId], Array<Notification>>,
   'getPublishedNewsByCategory' : ActorMethod<[string], Array<News>>,
+  'getRecentActivity' : ActorMethod<[bigint], Array<RecentActivity>>,
   'getScheme' : ActorMethod<[SchemeId], [] | [Scheme]>,
   'getUser' : ActorMethod<[Principal], [] | [User]>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getWebsiteSettings' : ActorMethod<[SettingsId], [] | [WebsiteSettings]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'markNotificationRead' : ActorMethod<[NotificationId], undefined>,
   'publishNews' : ActorMethod<[NewsId], undefined>,
   'recordActivity' : ActorMethod<[ActivityLog], undefined>,
   'recordAdminActivity' : ActorMethod<[ActivityType, string], undefined>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'searchMediaByType' : ActorMethod<[string], Array<Media>>,
   'setUserStatus' : ActorMethod<[Principal, UserStatus], undefined>,
   'updateJob' : ActorMethod<

@@ -1,11 +1,11 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
-import { useGetCallerRole } from '@/hooks/admin/useAdminAuth';
-import { isAdminRole } from '@/utils/userRole';
+import { useIsCallerAdmin } from '@/hooks/admin/useAdminAuth';
 import AccessDeniedView from './AccessDeniedView';
 import AdminAuthErrorView from './AdminAuthErrorView';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { normalizeAuthError } from '@/utils/adminAuthError';
 
 interface AdminRouteGuardProps {
   children: ReactNode;
@@ -14,10 +14,25 @@ interface AdminRouteGuardProps {
 
 export default function AdminRouteGuard({ children, onNavigate }: AdminRouteGuardProps) {
   const { identity, isInitializing } = useInternetIdentity();
-  const { data: role, isLoading: roleLoading, isFetched, isError, error, refetch } = useGetCallerRole();
+  const { data: isAdmin, isLoading, isFetched, isError, error, refetch } = useIsCallerAdmin();
+
+  // Redirect to login if not authenticated (using useEffect to avoid render-time navigation)
+  useEffect(() => {
+    if (!isInitializing && !isLoading && isFetched && !identity) {
+      onNavigate('admin-login');
+    }
+  }, [identity, isInitializing, isLoading, isFetched, onNavigate]);
+
+  // Redirect non-admin users to access denied or appropriate page
+  useEffect(() => {
+    if (!isInitializing && !isLoading && isFetched && identity && isAdmin === false) {
+      // User is authenticated but not admin - stay on current page to show AccessDeniedView
+      // The URL hash will already be admin-dashboard, which is correct for this error state
+    }
+  }, [identity, isInitializing, isLoading, isFetched, isAdmin, onNavigate]);
 
   // Show loading while checking authentication
-  if (isInitializing || roleLoading || !isFetched) {
+  if (isInitializing || isLoading || !isFetched) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md">
@@ -30,25 +45,24 @@ export default function AdminRouteGuard({ children, onNavigate }: AdminRouteGuar
     );
   }
 
-  // Show error view if role query failed
+  // Show error view if admin check failed
   if (isError) {
     return (
       <AdminAuthErrorView
         onRetry={() => refetch()}
         onNavigate={onNavigate}
-        errorMessage={error instanceof Error ? error.message : 'Failed to verify admin role'}
+        errorMessage={normalizeAuthError(error)}
       />
     );
   }
 
-  // Redirect to login if not authenticated
+  // Return null while redirecting (useEffect handles navigation)
   if (!identity) {
-    onNavigate('admin-login');
     return null;
   }
 
-  // Show access denied if not admin (using the safe role checker)
-  if (!isAdminRole(role)) {
+  // Show access denied if not admin
+  if (!isAdmin) {
     return <AccessDeniedView onNavigate={onNavigate} />;
   }
 
