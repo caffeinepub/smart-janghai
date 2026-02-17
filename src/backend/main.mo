@@ -23,6 +23,7 @@ actor {
   public type NotificationId = Nat;
   public type SettingsId = Text;
   public type ActivityLogId = Nat;
+  public type VotingResultId = Text;
 
   public type User = {
     id : Principal;
@@ -118,6 +119,14 @@ actor {
     user : Principal;
   };
 
+  public type VotingResult = {
+    id : VotingResultId;
+    village : Text;
+    candidate : Text;
+    votes : Nat;
+    lastUpdated : Time;
+  };
+
   var decommissioned : Bool = false;
 
   let users = Map.empty<Principal, User>();
@@ -128,6 +137,7 @@ actor {
   let notifications = Map.empty<NotificationId, Notification>();
   let websiteSettings = Map.empty<SettingsId, WebsiteSettings>();
   let activityLogs = Map.empty<ActivityLogId, ActivityLog>();
+  let votingResults = Map.empty<VotingResultId, VotingResult>();
 
   var nextNotificationId = 1;
   var nextActivityLogId = 1;
@@ -197,6 +207,7 @@ actor {
     websiteSettings.clear();
     activityLogs.clear();
     adminActivities.clear();
+    votingResults.clear();
     nextNotificationId := 1;
     nextActivityLogId := 1;
   };
@@ -726,6 +737,59 @@ actor {
     websiteSettings.get(id);
   };
 
+  // Voting Results (Admin CRUD)
+  public shared ({ caller }) func createVotingResult(village : Text, candidate : Text, votes : Nat) : async VotingResultId {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create voting results");
+    };
+
+    let now = Time.now();
+    let id = generateId("vote_", now);
+
+    let result : VotingResult = {
+      id;
+      village;
+      candidate;
+      votes;
+      lastUpdated = now;
+    };
+    votingResults.add(id, result);
+    id;
+  };
+
+  public shared ({ caller }) func updateVotingResult(id : VotingResultId, village : Text, candidate : Text, votes : Nat) : async () {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update voting results");
+    };
+
+    switch (votingResults.get(id)) {
+      case (null) { Runtime.trap("Voting result not found") };
+      case (?existingResult) {
+        let updatedResult : VotingResult = { existingResult with village; candidate; votes; lastUpdated = Time.now() };
+        votingResults.add(id, updatedResult);
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteVotingResult(id : VotingResultId) : async () {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can delete voting results");
+    };
+
+    switch (votingResults.get(id)) {
+      case (null) { Runtime.trap("Voting result not found") };
+      case (?_) { votingResults.remove(id) };
+    };
+  };
+
+  public query ({ caller }) func getAllVotingResults() : async [VotingResult] {
+    checkDecommissioned();
+    votingResults.values().toArray();
+  };
+
   // Dashboard Analytics and Metrics
   public type DashboardMetrics = {
     totalUsers : Nat;
@@ -838,6 +902,7 @@ actor {
     notifications : [(Nat, Notification)];
     websiteSettings : [(Text, WebsiteSettings)];
     activityLogs : [(Nat, ActivityLog)];
+    votingResults : [(Text, VotingResult)];
     nextNotificationId : Nat;
     nextActivityLogId : Nat;
   } {
@@ -854,6 +919,7 @@ actor {
       notifications = notifications.toArray();
       websiteSettings = websiteSettings.toArray();
       activityLogs = activityLogs.toArray();
+      votingResults = votingResults.toArray();
       nextNotificationId;
       nextActivityLogId;
     };

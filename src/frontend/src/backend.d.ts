@@ -33,6 +33,13 @@ export interface RecentActivity {
     timestamp: Time;
     details: string;
 }
+export interface VotingResult {
+    id: VotingResultId;
+    votes: bigint;
+    lastUpdated: Time;
+    village: string;
+    candidate: string;
+}
 export interface Job {
     id: JobId;
     status: JobStatus;
@@ -42,6 +49,7 @@ export interface Job {
     companyName: string;
     qualification: string;
 }
+export type VotingResultId = string;
 export type SchemeId = string;
 export interface Media {
     id: MediaId;
@@ -177,12 +185,14 @@ export interface backendInterface {
     createNotification(message: string, recipients: Array<Principal>): Promise<NotificationId>;
     createScheme(name: string, eligibilityDetails: string, applyLink: string, importantDates: string, documents: Array<MediaId>): Promise<SchemeId>;
     createUser(targetUserId: Principal, name: string, mobile: string, email: string, role: UserRole): Promise<void>;
+    createVotingResult(village: string, candidate: string, votes: bigint): Promise<VotingResultId>;
     decommissionWebsite(): Promise<void>;
     deleteJob(id: JobId): Promise<void>;
     deleteMedia(id: MediaId): Promise<void>;
     deleteNewsItem(id: NewsId): Promise<void>;
     deleteScheme(id: SchemeId): Promise<void>;
     deleteUser(id: Principal): Promise<void>;
+    deleteVotingResult(id: VotingResultId): Promise<void>;
     exportBackup(): Promise<{
         media: Array<[string, Media]>;
         activityLogs: Array<[bigint, ActivityLog]>;
@@ -193,6 +203,7 @@ export interface backendInterface {
         schemes: Array<[string, Scheme]>;
         users: Array<[Principal, User]>;
         nextNotificationId: bigint;
+        votingResults: Array<[string, VotingResult]>;
         websiteSettings: Array<[string, WebsiteSettings]>;
     }>;
     getActiveJobs(): Promise<Array<Job>>;
@@ -205,6 +216,7 @@ export interface backendInterface {
     getAllPublishedNews(): Promise<Array<News>>;
     getAllSchemes(): Promise<Array<Scheme>>;
     getAllUsers(): Promise<Array<User>>;
+    getAllVotingResults(): Promise<Array<VotingResult>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getDashboardMetrics(): Promise<DashboardMetrics>;
@@ -231,6 +243,7 @@ export interface backendInterface {
     updateNews(id: NewsId, title: string, description: string, category: string, tags: Array<string>, featuredImage: MediaId | null): Promise<void>;
     updateScheme(id: SchemeId, name: string, eligibilityDetails: string, applyLink: string, importantDates: string, documents: Array<MediaId>): Promise<void>;
     updateUser(id: Principal, name: string, mobile: string, email: string): Promise<void>;
+    updateVotingResult(id: VotingResultId, village: string, candidate: string, votes: bigint): Promise<void>;
     updateWebsiteSettings(settings: WebsiteSettings): Promise<void>;
     uploadMedia(filename: string, contentType: string, fileReference: ExternalBlob, size: bigint): Promise<MediaId>;
 }

@@ -78,7 +78,7 @@ export default function DashboardMainContent() {
       <div className="space-y-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Welcome back, Ajay 👋
+            Welcome back, User 👋
           </h1>
           <p className="text-muted-foreground mt-1">
             Member since: 2026

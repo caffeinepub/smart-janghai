@@ -17,6 +17,7 @@ import {
   Settings,
   BarChart3,
   Shield,
+  Vote,
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -45,6 +46,7 @@ const adminMenuItems = [
   { id: 'news', label: 'Manage News', icon: Newspaper },
   { id: 'schemes', label: 'Government Schemes', icon: Building2 },
   { id: 'jobs', label: 'Jobs', icon: Briefcase },
+  { id: 'voting-results', label: 'Voting Results', icon: Vote },
   { id: 'media', label: 'Media Library', icon: Image },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'settings', label: 'Website Settings', icon: Settings },

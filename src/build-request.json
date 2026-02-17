@@ -1,87 +1,118 @@
 {
   "kind": "build_request",
-  "title": "Emergency website decommission + data wipe mode",
-  "priority": "high",
+  "title": "Add homepage voting-results promo section plus voting widgets and admin-managed results",
+  "projectName": "Smart Janghai",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a backend-wide decommission switch that, when enabled, prevents normal app usage by rejecting or disabling all non-essential canister methods (including member and admin features) with a clear English error message indicating the website has been decommissioned.",
-      "target": "backend",
+      "text": "Add a new promotional section at the very top of the homepage (above the existing hero section) with the exact title text: \"GRAM PRADHAN VOTING LIVE RESULT OF WHOLE VILLAGES AROUND JANGHAI COMMING SOON STAY TUNED WITH US...\". The section must be visually prominent and clearly separated from the hero.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-1"
         ],
         "quotes": [
-          "DELETE WEBSITE NOW FROM EVERWHERE"
+          "ADD NEW SECTOIN AND ALSO PROMOTE THIS SECTION IN FRONT PAGE  WITH THE TITLE OF GRAM PRADHAN VOTING LIVE RESULT OF WHOLE VILLAGES AROUND JANGHAI COMMING SOON STAY TUNED WITH US...",
+          "1"
         ]
       },
       "acceptanceCriteria": [
-        "Backend stores a persistent `isDecommissioned` (or equivalent) flag in stable state so it survives upgrades/redeploys",
-        "When decommission mode is enabled, all regular feature methods (users/news/schemes/jobs/media/notifications/settings/admin/security export, etc.) are blocked in a consistent way (trap or return error) with an English message that the site is decommissioned",
-        "A minimal status/read-only method remains available to allow the frontend to detect decommission state (e.g., `getSystemStatus` returning `isDecommissioned`)"
+        "On the homepage, a new section renders above the current Hero Section.",
+        "The title text matches exactly (including capitalization/spelling) what the user provided.",
+        "The section is styled to be visually prominent (e.g., banner/card with strong typography) and responsive across mobile and desktop."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement an admin-only backend operation to immediately decommission the website and purge all stored application data from canister state (users, news, schemes, jobs, media metadata, notifications, website settings, activity logs, and any counters/IDs).",
-      "target": "backend",
+      "text": "Implement a 'Live Results (Coming Soon)' results widget inside the new homepage section that can display vote counts per village/candidate from the backend and automatically refreshes periodically (polling) to simulate live updates.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-1"
         ],
         "quotes": [
-          "DELETE WEBSITE NOW FROM EVERWHERE"
+          "“Generate a complete web SECTION that displays live voting results on a website.",
+          "It should include: • A frontend UI to show live vote counts dynamically updating.”"
         ]
       },
       "acceptanceCriteria": [
-        "There is a single admin-only method (e.g., `decommissionAndWipeAllData`) that (1) sets decommission mode ON and (2) clears all in-canister collections and resets counters/IDs",
-        "After running the wipe, subsequent reads for previously-created records return empty results / not found (as appropriate)",
-        "The wipe operation records an admin activity log entry if logging is still allowed; otherwise it completes without depending on logging",
-        "The operation is protected so non-admin callers cannot execute it"
+        "Homepage section includes a results UI that renders a list/table of villages and vote counts (or an empty-state when no data exists).",
+        "The widget refreshes results automatically at a fixed interval (e.g., every 5–10 seconds) without requiring a page reload.",
+        "Loading, empty, and error states are handled gracefully and are user-friendly in English."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add a frontend ‘Website Decommissioned’ screen and route override so that when the backend reports the app is decommissioned, all routes (home/login/dashboards/admin) are replaced with a single decommissioned message page in English.",
-      "target": "frontend",
+      "text": "Add backend support in the Motoko main actor to store and serve voting result data (villages, candidates, and counts) and expose public query methods to fetch results plus admin-only update methods to create/update/delete result entries.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-1"
         ],
         "quotes": [
-          "DELETE WEBSITE NOW FROM EVERWHERE"
+          "BOTH",
+          "“Generate a complete web SECTION that displays live voting results on a website.”"
         ]
       },
       "acceptanceCriteria": [
-        "On initial load (and when navigating), the frontend checks backend system status and detects decommission mode",
-        "If decommission mode is ON, the app renders only the decommissioned screen regardless of URL hash/route",
-        "The decommissioned screen contains only English user-facing text and does not expose any admin/member functionality (no login actions)",
-        "The decommissioned screen renders without relying on protected APIs that will be blocked in decommission mode (i.e., it must not crash due to blocked feature calls)"
+        "Backend exposes at least one public query method to retrieve the current voting results dataset used by the homepage widget.",
+        "Backend exposes admin-only shared methods to upsert and delete voting result entries (villages/candidates/counts).",
+        "Unauthorized callers attempting to modify results receive an authorization error/trap consistent with existing admin protections."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add an Admin 'Voting Results' management plugin (new admin module) that allows admins to manage the dataset shown on the homepage results widget (add/edit/remove villages/candidates and update counts).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "1 ADD NEW PLUGINS",
+          "BOTH"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin sidebar includes a new menu item for Voting Results, visible only in admin mode.",
+        "Admin module provides CRUD UI for voting results with validation and clear English labels.",
+        "Saving changes updates backend data and causes the homepage widget to reflect updated data after the next refresh (or via query invalidation)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add at least one additional 'plugin/widget' outside of the new voting section to satisfy the request for plugins elsewhere on the site, implemented as a non-invasive UI enhancement on the front page (e.g., a slim announcement ribbon or compact highlight card) referencing the same 'Coming Soon' message.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "BOTH"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A second, distinct widget appears somewhere else on the homepage outside the new top voting section (not inside it).",
+        "The widget is responsive, does not break existing homepage layout, and uses English text.",
+        "The widget can be disabled/removed by code easily (encapsulated component), and does not require external services."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if stable-state migration is required by the decommission flag and wipe behavior",
-    "Do not edit any files under frontend/src/components/ui or any paths listed in frontend.immutablePaths (compose instead)",
-    "Use English for any user-facing text"
+    "Do not introduce unsupported backend technologies (no Node.js/Express, Python/Flask, Firebase, external databases, or WebSockets/SSE).",
+    "Keep all backend logic in the single Motoko actor at backend/main.mo (single-actor architecture).",
+    "Do not modify any frontend files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
+    "All user-facing text added/changed must be in English."
   ],
   "nonGoals": [
-    "Deleting the canister from the Internet Computer network, removing DNS records, or taking down hosting outside of this codebase",
-    "Erasing data outside of canister state (e.g., external storage or third-party services)",
-    "Adding new product features unrelated to decommissioning"
+    "Implementing true real-time updates via WebSockets/Socket.IO or Server-Sent Events.",
+    "Integrating external databases like PostgreSQL/MySQL/MongoDB/Redis.",
+    "Building an end-user vote-submission system intended for secure elections (authentication/anti-fraud/one-person-one-vote guarantees).",
+    "Deploy instructions for non-Internet-Computer infrastructure."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

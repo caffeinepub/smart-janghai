@@ -5,6 +5,8 @@ import TextLogo from '@/components/site/TextLogo';
 import NotificationLauncherButton from '@/components/notifications/NotificationLauncherButton';
 import NotificationPanel from '@/components/notifications/NotificationPanel';
 import NotificationPanelErrorBoundary from '@/components/notifications/NotificationPanelErrorBoundary';
+import VotingPromoSection from '@/components/site/VotingPromoSection';
+import ComingSoonRibbon from '@/components/site/ComingSoonRibbon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Newspaper, Briefcase, FileText, GraduationCap, Users, ArrowRight } from 'lucide-react';
@@ -35,6 +37,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <SiteLayout>
+      {/* Voting Promo Section - Top of Page */}
+      <VotingPromoSection />
+
       {/* Hero Section */}
       <section
         className="relative min-h-[600px] flex items-center justify-center text-white"
@@ -88,6 +93,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </div>
         </div>
       </section>
+
+      {/* Coming Soon Ribbon */}
+      <ComingSoonRibbon />
 
       {/* Categories Section */}
       <section className="py-16 bg-background">

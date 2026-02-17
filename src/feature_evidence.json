@@ -2,12 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-frontend-website-decommissioned-screen-and-route-override-so-that-when-the-backend-reports-the-app-is-decommissioned-all-routes-home-login-dashboards-admin-are-replaced-with-a-single-decommissioned-message-page-in-english",
-      "featureTitle": "Add a frontend ‘Website Decommissioned’ screen and route override so that when the backend reports the app is decommissioned, all routes (home/login/dashboards/admin) are replaced with a single decommissioned message page in English.",
+      "featureId": "feature-add-a-new-promotional-section-at-the-very-top-of-the-homepage-above-the-existing-hero-section-with-the-exact-title-text-gram-pradhan-voting-live-result-of-whole-villages-around-janghai-comming-soon-stay-tuned-with-us-the-section-must-be-visually-prominent-and-clearly-separated-from-the-hero",
+      "featureTitle": "Add a new promotional section at the very top of the homepage (above the existing hero section) with the exact title text: \"GRAM PRADHAN VOTING LIVE RESULT OF WHOLE VILLAGES AROUND JANGHAI COMMING SOON STAY TUNED WITH US...\". The section must be visually prominent and clearly separated from the hero.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/hooks/useSystemStatus.ts",
-        "frontend/src/pages/DecommissionedPage.tsx"
+        "frontend/src/components/site/VotingPromoSection.tsx",
+        "frontend/src/pages/HomePage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -19,7 +18,75 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-3"
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-live-results-coming-soon-results-widget-inside-the-new-homepage-section-that-can-display-vote-counts-per-village-candidate-from-the-backend-and-automatically-refreshes-periodically-polling-to-simulate-live-updates",
+      "featureTitle": "Implement a 'Live Results (Coming Soon)' results widget inside the new homepage section that can display vote counts per village/candidate from the backend and automatically refreshes periodically (polling) to simulate live updates.",
+      "files": [
+        "frontend/src/components/site/LiveVotingResultsWidget.tsx",
+        "frontend/src/components/site/VotingPromoSection.tsx",
+        "frontend/src/hooks/votingResults.ts",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-an-admin-voting-results-management-plugin-new-admin-module-that-allows-admins-to-manage-the-dataset-shown-on-the-homepage-results-widget-add-edit-remove-villages-candidates-and-update-counts",
+      "featureTitle": "Add an Admin 'Voting Results' management plugin (new admin module) that allows admins to manage the dataset shown on the homepage results widget (add/edit/remove villages/candidates and update counts).",
+      "files": [
+        "frontend/src/components/admin/AdminModuleRouter.tsx",
+        "frontend/src/components/admin/modules/VotingResultsModuleView.tsx",
+        "frontend/src/components/admin/voting-results/VotingResultsList.tsx",
+        "frontend/src/components/dashboard/DashboardSidebar.tsx",
+        "frontend/src/hooks/admin/votingResults.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-at-least-one-additional-plugin-widget-outside-of-the-new-voting-section-to-satisfy-the-request-for-plugins-elsewhere-on-the-site-implemented-as-a-non-invasive-ui-enhancement-on-the-front-page-e-g-a-slim-announcement-ribbon-or-compact-highlight-card-referencing-the-same-coming-soon-message",
+      "featureTitle": "Add at least one additional 'plugin/widget' outside of the new voting section to satisfy the request for plugins elsewhere on the site, implemented as a non-invasive UI enhancement on the front page (e.g., a slim announcement ribbon or compact highlight card) referencing the same 'Coming Soon' message.",
+      "files": [
+        "frontend/src/components/site/ComingSoonRibbon.tsx",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
       ],
       "confidence": "high"
     }

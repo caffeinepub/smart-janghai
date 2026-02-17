@@ -89,14 +89,14 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface _CaffeineStorageRefillResult {
-    success?: boolean;
-    topped_up_amount?: bigint;
-}
 export interface UserProfile {
     name: string;
     email: string;
     mobile: string;
+}
+export interface _CaffeineStorageRefillResult {
+    success?: boolean;
+    topped_up_amount?: bigint;
 }
 export type SettingsId = string;
 export type Time = bigint;
@@ -115,6 +115,13 @@ export interface RecentActivity {
     timestamp: Time;
     details: string;
 }
+export interface VotingResult {
+    id: VotingResultId;
+    votes: bigint;
+    lastUpdated: Time;
+    village: string;
+    candidate: string;
+}
 export interface _CaffeineStorageCreateCertificateResult {
     method: string;
     blob_hash: string;
@@ -128,6 +135,7 @@ export interface Job {
     companyName: string;
     qualification: string;
 }
+export type VotingResultId = string;
 export type SchemeId = string;
 export interface Media {
     id: MediaId;
@@ -270,12 +278,14 @@ export interface backendInterface {
     createNotification(message: string, recipients: Array<Principal>): Promise<NotificationId>;
     createScheme(name: string, eligibilityDetails: string, applyLink: string, importantDates: string, documents: Array<MediaId>): Promise<SchemeId>;
     createUser(targetUserId: Principal, name: string, mobile: string, email: string, role: UserRole): Promise<void>;
+    createVotingResult(village: string, candidate: string, votes: bigint): Promise<VotingResultId>;
     decommissionWebsite(): Promise<void>;
     deleteJob(id: JobId): Promise<void>;
     deleteMedia(id: MediaId): Promise<void>;
     deleteNewsItem(id: NewsId): Promise<void>;
     deleteScheme(id: SchemeId): Promise<void>;
     deleteUser(id: Principal): Promise<void>;
+    deleteVotingResult(id: VotingResultId): Promise<void>;
     exportBackup(): Promise<{
         media: Array<[string, Media]>;
         activityLogs: Array<[bigint, ActivityLog]>;
@@ -286,6 +296,7 @@ export interface backendInterface {
         schemes: Array<[string, Scheme]>;
         users: Array<[Principal, User]>;
         nextNotificationId: bigint;
+        votingResults: Array<[string, VotingResult]>;
         websiteSettings: Array<[string, WebsiteSettings]>;
     }>;
     getActiveJobs(): Promise<Array<Job>>;
@@ -298,6 +309,7 @@ export interface backendInterface {
     getAllPublishedNews(): Promise<Array<News>>;
     getAllSchemes(): Promise<Array<Scheme>>;
     getAllUsers(): Promise<Array<User>>;
+    getAllVotingResults(): Promise<Array<VotingResult>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getDashboardMetrics(): Promise<DashboardMetrics>;
@@ -324,10 +336,11 @@ export interface backendInterface {
     updateNews(id: NewsId, title: string, description: string, category: string, tags: Array<string>, featuredImage: MediaId | null): Promise<void>;
     updateScheme(id: SchemeId, name: string, eligibilityDetails: string, applyLink: string, importantDates: string, documents: Array<MediaId>): Promise<void>;
     updateUser(id: Principal, name: string, mobile: string, email: string): Promise<void>;
+    updateVotingResult(id: VotingResultId, village: string, candidate: string, votes: bigint): Promise<void>;
     updateWebsiteSettings(settings: WebsiteSettings): Promise<void>;
     uploadMedia(filename: string, contentType: string, fileReference: ExternalBlob, size: bigint): Promise<MediaId>;
 }
-import type { ActivityLog as _ActivityLog, ActivityType as _ActivityType, AdminActivity as _AdminActivity, ExternalBlob as _ExternalBlob, Job as _Job, JobId as _JobId, JobStatus as _JobStatus, Media as _Media, MediaId as _MediaId, News as _News, NewsId as _NewsId, NewsStatus as _NewsStatus, Notification as _Notification, Principal as _Principal, RecentActivity as _RecentActivity, Scheme as _Scheme, SettingsId as _SettingsId, Time as _Time, User as _User, UserProfile as _UserProfile, UserRole as _UserRole, UserStatus as _UserStatus, WebsiteSettings as _WebsiteSettings, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
+import type { ActivityLog as _ActivityLog, ActivityType as _ActivityType, AdminActivity as _AdminActivity, ExternalBlob as _ExternalBlob, Job as _Job, JobId as _JobId, JobStatus as _JobStatus, Media as _Media, MediaId as _MediaId, News as _News, NewsId as _NewsId, NewsStatus as _NewsStatus, Notification as _Notification, Principal as _Principal, RecentActivity as _RecentActivity, Scheme as _Scheme, SettingsId as _SettingsId, Time as _Time, User as _User, UserProfile as _UserProfile, UserRole as _UserRole, UserStatus as _UserStatus, VotingResult as _VotingResult, WebsiteSettings as _WebsiteSettings, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _caffeineStorageBlobIsLive(arg0: Uint8Array): Promise<boolean> {
@@ -526,6 +539,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async createVotingResult(arg0: string, arg1: string, arg2: bigint): Promise<VotingResultId> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createVotingResult(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createVotingResult(arg0, arg1, arg2);
+            return result;
+        }
+    }
     async decommissionWebsite(): Promise<void> {
         if (this.processError) {
             try {
@@ -610,6 +637,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async deleteVotingResult(arg0: VotingResultId): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteVotingResult(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteVotingResult(arg0);
+            return result;
+        }
+    }
     async exportBackup(): Promise<{
         media: Array<[string, Media]>;
         activityLogs: Array<[bigint, ActivityLog]>;
@@ -620,6 +661,7 @@ export class Backend implements backendInterface {
         schemes: Array<[string, Scheme]>;
         users: Array<[Principal, User]>;
         nextNotificationId: bigint;
+        votingResults: Array<[string, VotingResult]>;
         websiteSettings: Array<[string, WebsiteSettings]>;
     }> {
         if (this.processError) {
@@ -773,6 +815,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getAllUsers();
             return from_candid_vec_n51(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllVotingResults(): Promise<Array<VotingResult>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllVotingResults();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllVotingResults();
+            return result;
         }
     }
     async getCallerUserProfile(): Promise<UserProfile | null> {
@@ -1139,6 +1195,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async updateVotingResult(arg0: VotingResultId, arg1: string, arg2: string, arg3: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateVotingResult(arg0, arg1, arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateVotingResult(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
     async updateWebsiteSettings(arg0: WebsiteSettings): Promise<void> {
         if (this.processError) {
             try {
@@ -1250,6 +1320,7 @@ async function from_candid_record_n11(_uploadFile: (file: ExternalBlob) => Promi
     schemes: Array<[string, _Scheme]>;
     users: Array<[_Principal, _User]>;
     nextNotificationId: bigint;
+    votingResults: Array<[string, _VotingResult]>;
     websiteSettings: Array<[string, _WebsiteSettings]>;
 }): Promise<{
     media: Array<[string, Media]>;
@@ -1261,6 +1332,7 @@ async function from_candid_record_n11(_uploadFile: (file: ExternalBlob) => Promi
     schemes: Array<[string, Scheme]>;
     users: Array<[Principal, User]>;
     nextNotificationId: bigint;
+    votingResults: Array<[string, VotingResult]>;
     websiteSettings: Array<[string, WebsiteSettings]>;
 }> {
     return {
@@ -1273,6 +1345,7 @@ async function from_candid_record_n11(_uploadFile: (file: ExternalBlob) => Promi
         schemes: value.schemes,
         users: from_candid_vec_n31(_uploadFile, _downloadFile, value.users),
         nextNotificationId: value.nextNotificationId,
+        votingResults: value.votingResults,
         websiteSettings: from_candid_vec_n39(_uploadFile, _downloadFile, value.websiteSettings)
     };
 }

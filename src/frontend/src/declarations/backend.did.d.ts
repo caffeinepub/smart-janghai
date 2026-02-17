@@ -146,6 +146,14 @@ export type UserRole = { 'admin' : null } |
   { 'guest' : null };
 export type UserStatus = { 'active' : null } |
   { 'inactive' : null };
+export interface VotingResult {
+  'id' : VotingResultId,
+  'votes' : bigint,
+  'lastUpdated' : Time,
+  'village' : string,
+  'candidate' : string,
+}
+export type VotingResultId = string;
 export interface WebsiteSettings {
   'id' : SettingsId,
   'contactInfo' : string,
@@ -203,12 +211,14 @@ export interface _SERVICE {
     [Principal, string, string, string, UserRole],
     undefined
   >,
+  'createVotingResult' : ActorMethod<[string, string, bigint], VotingResultId>,
   'decommissionWebsite' : ActorMethod<[], undefined>,
   'deleteJob' : ActorMethod<[JobId], undefined>,
   'deleteMedia' : ActorMethod<[MediaId], undefined>,
   'deleteNewsItem' : ActorMethod<[NewsId], undefined>,
   'deleteScheme' : ActorMethod<[SchemeId], undefined>,
   'deleteUser' : ActorMethod<[Principal], undefined>,
+  'deleteVotingResult' : ActorMethod<[VotingResultId], undefined>,
   'exportBackup' : ActorMethod<
     [],
     {
@@ -221,6 +231,7 @@ export interface _SERVICE {
       'schemes' : Array<[string, Scheme]>,
       'users' : Array<[Principal, User]>,
       'nextNotificationId' : bigint,
+      'votingResults' : Array<[string, VotingResult]>,
       'websiteSettings' : Array<[string, WebsiteSettings]>,
     }
   >,
@@ -234,6 +245,7 @@ export interface _SERVICE {
   'getAllPublishedNews' : ActorMethod<[], Array<News>>,
   'getAllSchemes' : ActorMethod<[], Array<Scheme>>,
   'getAllUsers' : ActorMethod<[], Array<User>>,
+  'getAllVotingResults' : ActorMethod<[], Array<VotingResult>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getDashboardMetrics' : ActorMethod<[], DashboardMetrics>,
@@ -269,6 +281,10 @@ export interface _SERVICE {
     undefined
   >,
   'updateUser' : ActorMethod<[Principal, string, string, string], undefined>,
+  'updateVotingResult' : ActorMethod<
+    [VotingResultId, string, string, bigint],
+    undefined
+  >,
   'updateWebsiteSettings' : ActorMethod<[WebsiteSettings], undefined>,
   'uploadMedia' : ActorMethod<[string, string, ExternalBlob, bigint], MediaId>,
 }

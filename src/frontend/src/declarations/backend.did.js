@@ -31,6 +31,7 @@ export const MediaId = IDL.Text;
 export const NewsId = IDL.Text;
 export const NotificationId = IDL.Nat;
 export const SchemeId = IDL.Text;
+export const VotingResultId = IDL.Text;
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const Media = IDL.Record({
   'id' : MediaId,
@@ -105,6 +106,13 @@ export const User = IDL.Record({
   'email' : IDL.Text,
   'mobile' : IDL.Text,
   'registrationDate' : Time,
+});
+export const VotingResult = IDL.Record({
+  'id' : VotingResultId,
+  'votes' : IDL.Nat,
+  'lastUpdated' : Time,
+  'village' : IDL.Text,
+  'candidate' : IDL.Text,
 });
 export const SettingsId = IDL.Text;
 export const WebsiteSettings = IDL.Record({
@@ -231,12 +239,18 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
+  'createVotingResult' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Nat],
+      [VotingResultId],
+      [],
+    ),
   'decommissionWebsite' : IDL.Func([], [], []),
   'deleteJob' : IDL.Func([JobId], [], []),
   'deleteMedia' : IDL.Func([MediaId], [], []),
   'deleteNewsItem' : IDL.Func([NewsId], [], []),
   'deleteScheme' : IDL.Func([SchemeId], [], []),
   'deleteUser' : IDL.Func([Principal], [], []),
+  'deleteVotingResult' : IDL.Func([VotingResultId], [], []),
   'exportBackup' : IDL.Func(
       [],
       [
@@ -250,6 +264,7 @@ export const idlService = IDL.Service({
           'schemes' : IDL.Vec(IDL.Tuple(IDL.Text, Scheme)),
           'users' : IDL.Vec(IDL.Tuple(Principal, User)),
           'nextNotificationId' : IDL.Nat,
+          'votingResults' : IDL.Vec(IDL.Tuple(IDL.Text, VotingResult)),
           'websiteSettings' : IDL.Vec(IDL.Tuple(IDL.Text, WebsiteSettings)),
         }),
       ],
@@ -265,6 +280,7 @@ export const idlService = IDL.Service({
   'getAllPublishedNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
   'getAllSchemes' : IDL.Func([], [IDL.Vec(Scheme)], ['query']),
   'getAllUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+  'getAllVotingResults' : IDL.Func([], [IDL.Vec(VotingResult)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getDashboardMetrics' : IDL.Func([], [DashboardMetrics], ['query']),
@@ -326,6 +342,11 @@ export const idlService = IDL.Service({
       [],
     ),
   'updateUser' : IDL.Func([Principal, IDL.Text, IDL.Text, IDL.Text], [], []),
+  'updateVotingResult' : IDL.Func(
+      [VotingResultId, IDL.Text, IDL.Text, IDL.Nat],
+      [],
+      [],
+    ),
   'updateWebsiteSettings' : IDL.Func([WebsiteSettings], [], []),
   'uploadMedia' : IDL.Func(
       [IDL.Text, IDL.Text, ExternalBlob, IDL.Nat],
@@ -360,6 +381,7 @@ export const idlFactory = ({ IDL }) => {
   const NewsId = IDL.Text;
   const NotificationId = IDL.Nat;
   const SchemeId = IDL.Text;
+  const VotingResultId = IDL.Text;
   const ExternalBlob = IDL.Vec(IDL.Nat8);
   const Media = IDL.Record({
     'id' : MediaId,
@@ -431,6 +453,13 @@ export const idlFactory = ({ IDL }) => {
     'email' : IDL.Text,
     'mobile' : IDL.Text,
     'registrationDate' : Time,
+  });
+  const VotingResult = IDL.Record({
+    'id' : VotingResultId,
+    'votes' : IDL.Nat,
+    'lastUpdated' : Time,
+    'village' : IDL.Text,
+    'candidate' : IDL.Text,
   });
   const SettingsId = IDL.Text;
   const WebsiteSettings = IDL.Record({
@@ -557,12 +586,18 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
+    'createVotingResult' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Nat],
+        [VotingResultId],
+        [],
+      ),
     'decommissionWebsite' : IDL.Func([], [], []),
     'deleteJob' : IDL.Func([JobId], [], []),
     'deleteMedia' : IDL.Func([MediaId], [], []),
     'deleteNewsItem' : IDL.Func([NewsId], [], []),
     'deleteScheme' : IDL.Func([SchemeId], [], []),
     'deleteUser' : IDL.Func([Principal], [], []),
+    'deleteVotingResult' : IDL.Func([VotingResultId], [], []),
     'exportBackup' : IDL.Func(
         [],
         [
@@ -576,6 +611,7 @@ export const idlFactory = ({ IDL }) => {
             'schemes' : IDL.Vec(IDL.Tuple(IDL.Text, Scheme)),
             'users' : IDL.Vec(IDL.Tuple(Principal, User)),
             'nextNotificationId' : IDL.Nat,
+            'votingResults' : IDL.Vec(IDL.Tuple(IDL.Text, VotingResult)),
             'websiteSettings' : IDL.Vec(IDL.Tuple(IDL.Text, WebsiteSettings)),
           }),
         ],
@@ -591,6 +627,7 @@ export const idlFactory = ({ IDL }) => {
     'getAllPublishedNews' : IDL.Func([], [IDL.Vec(News)], ['query']),
     'getAllSchemes' : IDL.Func([], [IDL.Vec(Scheme)], ['query']),
     'getAllUsers' : IDL.Func([], [IDL.Vec(User)], ['query']),
+    'getAllVotingResults' : IDL.Func([], [IDL.Vec(VotingResult)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getDashboardMetrics' : IDL.Func([], [DashboardMetrics], ['query']),
@@ -656,6 +693,11 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateUser' : IDL.Func([Principal, IDL.Text, IDL.Text, IDL.Text], [], []),
+    'updateVotingResult' : IDL.Func(
+        [VotingResultId, IDL.Text, IDL.Text, IDL.Nat],
+        [],
+        [],
+      ),
     'updateWebsiteSettings' : IDL.Func([WebsiteSettings], [], []),
     'uploadMedia' : IDL.Func(
         [IDL.Text, IDL.Text, ExternalBlob, IDL.Nat],

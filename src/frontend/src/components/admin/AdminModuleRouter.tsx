@@ -8,6 +8,7 @@ import NotificationsModuleView from './modules/NotificationsModuleView';
 import WebsiteSettingsModuleView from './modules/WebsiteSettingsModuleView';
 import ReportsAnalyticsModuleView from './modules/ReportsAnalyticsModuleView';
 import BackupSecurityModuleView from './modules/BackupSecurityModuleView';
+import VotingResultsModuleView from './modules/VotingResultsModuleView';
 
 interface AdminModuleRouterProps {
   activeModule: string;
@@ -35,6 +36,8 @@ export default function AdminModuleRouter({ activeModule }: AdminModuleRouterPro
       return <ReportsAnalyticsModuleView />;
     case 'security':
       return <BackupSecurityModuleView />;
+    case 'voting-results':
+      return <VotingResultsModuleView />;
     default:
       return <DashboardOverviewView />;
   }
