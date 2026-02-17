@@ -94,6 +94,10 @@ export const Scheme = IDL.Record({
   'importantDates' : IDL.Text,
   'eligibilityDetails' : IDL.Text,
 });
+export const PollVote = IDL.Record({
+  'principal' : Principal,
+  'candidateName' : IDL.Text,
+});
 export const UserStatus = IDL.Variant({
   'active' : IDL.Null,
   'inactive' : IDL.Null,
@@ -124,6 +128,14 @@ export const WebsiteSettings = IDL.Record({
   'logo' : IDL.Opt(MediaId),
   'name' : IDL.Text,
   'seoDescription' : IDL.Text,
+});
+export const PollCandidate = IDL.Record({
+  'votes' : IDL.Nat,
+  'name' : IDL.Text,
+});
+export const LivePoll = IDL.Record({
+  'endTime' : IDL.Opt(Time),
+  'candidates' : IDL.Vec(PollCandidate),
 });
 export const ActivityType = IDL.Variant({
   'mediaDeleted' : IDL.Null,
@@ -177,6 +189,10 @@ export const MonthlyGrowth = IDL.Record({
   'users' : IDL.Nat,
 });
 export const UserId = IDL.Principal;
+export const PollStatus = IDL.Variant({
+  'expired' : IDL.Null,
+  'ongoing' : IDL.Null,
+});
 export const RecentActivity = IDL.Record({
   'activityType' : ActivityType,
   'user' : Principal,
@@ -229,6 +245,7 @@ export const idlService = IDL.Service({
       [NotificationId],
       [],
     ),
+  'createOrUpdatePoll' : IDL.Func([IDL.Vec(IDL.Text), IDL.Opt(Time)], [], []),
   'createScheme' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(MediaId)],
       [SchemeId],
@@ -262,10 +279,12 @@ export const idlService = IDL.Service({
           'jobs' : IDL.Vec(IDL.Tuple(IDL.Text, Job)),
           'news' : IDL.Vec(IDL.Tuple(IDL.Text, News)),
           'schemes' : IDL.Vec(IDL.Tuple(IDL.Text, Scheme)),
+          'pollVotes' : IDL.Vec(IDL.Tuple(Principal, PollVote)),
           'users' : IDL.Vec(IDL.Tuple(Principal, User)),
           'nextNotificationId' : IDL.Nat,
           'votingResults' : IDL.Vec(IDL.Tuple(IDL.Text, VotingResult)),
           'websiteSettings' : IDL.Vec(IDL.Tuple(IDL.Text, WebsiteSettings)),
+          'activePoll' : IDL.Opt(LivePoll),
         }),
       ],
       [],
@@ -292,6 +311,21 @@ export const idlService = IDL.Service({
       [IDL.Vec(Notification)],
       ['query'],
     ),
+  'getPollResults' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'status' : PollStatus,
+          'candidates' : IDL.Opt(IDL.Vec(PollCandidate)),
+        }),
+      ],
+      ['query'],
+    ),
+  'getPollStatus' : IDL.Func(
+      [],
+      [IDL.Record({ 'status' : PollStatus, 'poll' : IDL.Opt(LivePoll) })],
+      ['query'],
+    ),
   'getPublishedNewsByCategory' : IDL.Func(
       [IDL.Text],
       [IDL.Vec(News)],
@@ -315,6 +349,7 @@ export const idlService = IDL.Service({
   'publishNews' : IDL.Func([NewsId], [], []),
   'recordActivity' : IDL.Func([ActivityLog], [], []),
   'recordAdminActivity' : IDL.Func([ActivityType, IDL.Text], [], []),
+  'resetPoll' : IDL.Func([], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'searchMediaByType' : IDL.Func([IDL.Text], [IDL.Vec(Media)], ['query']),
   'setUserStatus' : IDL.Func([Principal, UserStatus], [], []),
@@ -353,6 +388,7 @@ export const idlService = IDL.Service({
       [MediaId],
       [],
     ),
+  'vote' : IDL.Func([IDL.Text], [IDL.Text], []),
 });
 
 export const idlInitArgs = [];
@@ -441,6 +477,10 @@ export const idlFactory = ({ IDL }) => {
     'importantDates' : IDL.Text,
     'eligibilityDetails' : IDL.Text,
   });
+  const PollVote = IDL.Record({
+    'principal' : Principal,
+    'candidateName' : IDL.Text,
+  });
   const UserStatus = IDL.Variant({
     'active' : IDL.Null,
     'inactive' : IDL.Null,
@@ -471,6 +511,11 @@ export const idlFactory = ({ IDL }) => {
     'logo' : IDL.Opt(MediaId),
     'name' : IDL.Text,
     'seoDescription' : IDL.Text,
+  });
+  const PollCandidate = IDL.Record({ 'votes' : IDL.Nat, 'name' : IDL.Text });
+  const LivePoll = IDL.Record({
+    'endTime' : IDL.Opt(Time),
+    'candidates' : IDL.Vec(PollCandidate),
   });
   const ActivityType = IDL.Variant({
     'mediaDeleted' : IDL.Null,
@@ -524,6 +569,10 @@ export const idlFactory = ({ IDL }) => {
     'users' : IDL.Nat,
   });
   const UserId = IDL.Principal;
+  const PollStatus = IDL.Variant({
+    'expired' : IDL.Null,
+    'ongoing' : IDL.Null,
+  });
   const RecentActivity = IDL.Record({
     'activityType' : ActivityType,
     'user' : Principal,
@@ -576,6 +625,7 @@ export const idlFactory = ({ IDL }) => {
         [NotificationId],
         [],
       ),
+    'createOrUpdatePoll' : IDL.Func([IDL.Vec(IDL.Text), IDL.Opt(Time)], [], []),
     'createScheme' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Vec(MediaId)],
         [SchemeId],
@@ -609,10 +659,12 @@ export const idlFactory = ({ IDL }) => {
             'jobs' : IDL.Vec(IDL.Tuple(IDL.Text, Job)),
             'news' : IDL.Vec(IDL.Tuple(IDL.Text, News)),
             'schemes' : IDL.Vec(IDL.Tuple(IDL.Text, Scheme)),
+            'pollVotes' : IDL.Vec(IDL.Tuple(Principal, PollVote)),
             'users' : IDL.Vec(IDL.Tuple(Principal, User)),
             'nextNotificationId' : IDL.Nat,
             'votingResults' : IDL.Vec(IDL.Tuple(IDL.Text, VotingResult)),
             'websiteSettings' : IDL.Vec(IDL.Tuple(IDL.Text, WebsiteSettings)),
+            'activePoll' : IDL.Opt(LivePoll),
           }),
         ],
         [],
@@ -643,6 +695,21 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(Notification)],
         ['query'],
       ),
+    'getPollResults' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'status' : PollStatus,
+            'candidates' : IDL.Opt(IDL.Vec(PollCandidate)),
+          }),
+        ],
+        ['query'],
+      ),
+    'getPollStatus' : IDL.Func(
+        [],
+        [IDL.Record({ 'status' : PollStatus, 'poll' : IDL.Opt(LivePoll) })],
+        ['query'],
+      ),
     'getPublishedNewsByCategory' : IDL.Func(
         [IDL.Text],
         [IDL.Vec(News)],
@@ -666,6 +733,7 @@ export const idlFactory = ({ IDL }) => {
     'publishNews' : IDL.Func([NewsId], [], []),
     'recordActivity' : IDL.Func([ActivityLog], [], []),
     'recordAdminActivity' : IDL.Func([ActivityType, IDL.Text], [], []),
+    'resetPoll' : IDL.Func([], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'searchMediaByType' : IDL.Func([IDL.Text], [IDL.Vec(Media)], ['query']),
     'setUserStatus' : IDL.Func([Principal, UserStatus], [], []),
@@ -704,6 +772,7 @@ export const idlFactory = ({ IDL }) => {
         [MediaId],
         [],
       ),
+    'vote' : IDL.Func([IDL.Text], [IDL.Text], []),
   });
 };
 

@@ -1,16 +1,16 @@
 import Array "mo:core/Array";
 import Map "mo:core/Map";
 import Time "mo:core/Time";
+import Text "mo:core/Text";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
 
-(with migration = Migration.run)
-actor {
+
+ actor {
   type Time = Time.Time;
   type Principal = Principal.Principal;
   public type UserRole = AccessControl.UserRole;
@@ -125,6 +125,27 @@ actor {
     candidate : Text;
     votes : Nat;
     lastUpdated : Time;
+  };
+
+  // Live Poll Types
+  public type PollStatus = {
+    #ongoing;
+    #expired;
+  };
+
+  public type PollCandidate = {
+    name : Text;
+    votes : Nat;
+  };
+
+  public type LivePoll = {
+    candidates : [PollCandidate];
+    endTime : ?Time;
+  };
+
+  public type PollVote = {
+    principal : Principal;
+    candidateName : Text;
   };
 
   var decommissioned : Bool = false;
@@ -790,6 +811,128 @@ actor {
     votingResults.values().toArray();
   };
 
+  // Live Poll (Voting Booth) Management
+  var activePoll : ?LivePoll = null;
+  var pollVotes = Map.empty<Principal, PollVote>();
+
+  public shared ({ caller }) func createOrUpdatePoll(candidates : [Text], endTime : ?Time) : async () {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create/update polls");
+    };
+
+    let pollCandidates = candidates.map(func(name) { { name; votes = 0 } });
+    activePoll := ?{
+      candidates = pollCandidates;
+      endTime;
+    };
+
+    pollVotes.clear();
+  };
+
+  public query ({ caller }) func getPollStatus() : async {
+    poll : ?LivePoll; status : PollStatus;
+  } {
+    checkDecommissioned();
+    switch (activePoll) {
+      case (null) { return { poll = null; status = #expired } };
+      case (?poll) {
+        let now = Time.now();
+        let status = switch (poll.endTime) {
+          case (null) { #ongoing };
+          case (?end) {
+            if (now < end) { #ongoing } else { #expired };
+          };
+        };
+        { poll = activePoll; status };
+      };
+    };
+  };
+
+  public query ({ caller }) func getPollResults() : async {
+    candidates : ?[PollCandidate]; status : PollStatus;
+  } {
+    checkDecommissioned();
+    switch (activePoll) {
+      case (null) { return { candidates = null; status = #expired } };
+      case (?poll) {
+        let now = Time.now();
+        let status = switch (poll.endTime) {
+          case (null) { #ongoing };
+          case (?end) {
+            if (now < end) { #ongoing } else { #expired };
+          };
+        };
+        { candidates = ?poll.candidates; status };
+      };
+    };
+  };
+
+  public shared ({ caller }) func vote(candidateName : Text) : async Text {
+    checkDecommissioned();
+
+    // Enforce authentication: only authenticated users (not guests) can vote
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap(
+        "Unauthorized: Only authenticated users can vote. Please log in with Internet Identity."
+      );
+    };
+
+    switch (activePoll) {
+      case (null) { return "Poll not available" };
+      case (?poll) {
+        let now = Time.now();
+        let isExpired = switch (poll.endTime) {
+          case (null) { false };
+          case (?end) { now > end };
+        };
+
+        if (isExpired) { return "Poll has ended." };
+
+        switch (pollVotes.get(caller)) {
+          case (null) {
+            switch (poll.candidates.find(
+              func(c) { c.name == candidateName }
+            )) {
+              case (null) { return "Candidate " # candidateName # " not found" };
+              case (?_) {
+                let newCandidates = poll.candidates.map(
+                  func(c) {
+                    if (c.name == candidateName) { { c with votes = c.votes + 1 } } else { c };
+                  }
+                );
+                let updatedPoll : LivePoll = {
+                  poll with candidates = newCandidates;
+                };
+                let newVote : PollVote = {
+                  principal = caller;
+                  candidateName;
+                };
+
+                pollVotes.add(caller, newVote);
+                activePoll := ?updatedPoll;
+                return "Vote successful";
+              };
+            };
+          };
+          case (?vote) {
+            return "You already voted for " # vote.candidateName;
+          };
+        };
+      };
+    };
+  };
+
+  public shared ({ caller }) func resetPoll() : async () {
+    checkDecommissioned();
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can reset polls");
+    };
+
+    activePoll := null;
+    pollVotes.clear();
+  };
+
   // Dashboard Analytics and Metrics
   public type DashboardMetrics = {
     totalUsers : Nat;
@@ -905,6 +1048,8 @@ actor {
     votingResults : [(Text, VotingResult)];
     nextNotificationId : Nat;
     nextActivityLogId : Nat;
+    activePoll : ?LivePoll;
+    pollVotes : [(Principal, PollVote)];
   } {
     checkDecommissioned();
     if (not AccessControl.isAdmin(accessControlState, caller)) {
@@ -922,6 +1067,8 @@ actor {
       votingResults = votingResults.toArray();
       nextNotificationId;
       nextActivityLogId;
+      activePoll;
+      pollVotes = pollVotes.toArray();
     };
   };
 

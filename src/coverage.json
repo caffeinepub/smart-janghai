@@ -1,111 +1,65 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T09:16:02.942Z",
+  "generatedAt": "2026-02-17T09:47:28.510Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 4,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a new promotional section at the very top of the homepage (above the existing hero section) with the exact title text: \"GRAM PRADHAN VOTING LIVE RESULT OF WHOLE VILLAGES AROUND JANGHAI COMMING SOON STAY TUNED WITH US...\". The section must be visually prominent and clearly separated from the hero.",
+        "summary": "Fix the app-wide loading gate so the UI does not get stuck on the global “Loading…” screen when the backend actor is temporarily null/unavailable during initialization; the Home page (and other routes) must still render in a fail-open manner unless the backend explicitly reports decommissioning.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/site/VotingPromoSection.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useSystemStatus.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/site/VotingPromoSection.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/hooks/useSystemStatus.ts"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Implement a 'Live Results (Coming Soon)' results widget inside the new homepage section that can display vote counts per village/candidate from the backend and automatically refreshes periodically (polling) to simulate live updates.",
+        "summary": "Ensure the top-of-homepage VotingPromoSection (including LivePollWidget and LiveVotingResultsWidget) always displays a clear UI state for loading, empty data, and errors instead of rendering nothing; all user-facing messages must be in English.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/votingResults.ts",
-          "frontend/src/components/site/LiveVotingResultsWidget.tsx",
-          "frontend/src/components/site/VotingPromoSection.tsx",
-          "frontend/src/pages/HomePage.tsx"
+          "frontend/src/components/site/LivePollWidget.tsx",
+          "frontend/src/components/site/VotingPromoSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/votingResults.ts",
-          "frontend/src/components/site/LiveVotingResultsWidget.tsx",
-          "frontend/src/components/site/VotingPromoSection.tsx",
-          "frontend/src/pages/HomePage.tsx"
+          "frontend/src/components/site/LivePollWidget.tsx",
+          "frontend/src/components/site/VotingPromoSection.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Add backend support in the Motoko main actor to store and serve voting result data (villages, candidates, and counts) and expose public query methods to fetch results plus admin-only update methods to create/update/delete result entries.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Add an Admin 'Voting Results' management plugin (new admin module) that allows admins to manage the dataset shown on the homepage results widget (add/edit/remove villages/candidates and update counts).",
+        "summary": "Replace silent rendering failures with visible fallbacks for notification UI: if NotificationPanelErrorBoundary catches an error, show a small inline fallback message (in English) rather than returning null so users do not experience missing UI with no explanation.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/admin/votingResults.ts",
-          "frontend/src/components/admin/modules/VotingResultsModuleView.tsx",
-          "frontend/src/components/admin/voting-results/VotingResultsList.tsx",
-          "frontend/src/components/admin/voting-results/VotingResultForm.tsx",
-          "frontend/src/components/admin/AdminModuleRouter.tsx",
-          "frontend/src/components/dashboard/DashboardSidebar.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/admin/votingResults.ts",
-          "frontend/src/components/admin/modules/VotingResultsModuleView.tsx",
-          "frontend/src/components/admin/voting-results/VotingResultsList.tsx",
-          "frontend/src/components/admin/AdminModuleRouter.tsx",
-          "frontend/src/components/dashboard/DashboardSidebar.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Add at least one additional 'plugin/widget' outside of the new voting section to satisfy the request for plugins elsewhere on the site, implemented as a non-invasive UI enhancement on the front page (e.g., a slim announcement ribbon or compact highlight card) referencing the same 'Coming Soon' message.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/site/ComingSoonRibbon.tsx",
+          "frontend/src/components/notifications/NotificationPanelErrorBoundary.tsx",
           "frontend/src/pages/HomePage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/site/ComingSoonRibbon.tsx",
-          "frontend/src/pages/HomePage.tsx"
+          "frontend/src/components/notifications/NotificationPanelErrorBoundary.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/admin/AdminModuleRouter.tsx",
-    "frontend/src/components/admin/modules/VotingResultsModuleView.tsx",
-    "frontend/src/components/admin/voting-results/VotingResultFormDialog.tsx",
-    "frontend/src/components/admin/voting-results/VotingResultsList.tsx",
-    "frontend/src/components/dashboard/DashboardSidebar.tsx",
-    "frontend/src/components/site/ComingSoonRibbon.tsx",
-    "frontend/src/components/site/LiveVotingResultsWidget.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/notifications/NotificationPanelErrorBoundary.tsx",
+    "frontend/src/components/site/LivePollWidget.tsx",
     "frontend/src/components/site/VotingPromoSection.tsx",
-    "frontend/src/config.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/admin/votingResults.ts",
-    "frontend/src/hooks/votingResults.ts",
-    "frontend/src/pages/HomePage.tsx",
+    "frontend/src/hooks/useSystemStatus.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,115 +1,71 @@
 {
   "kind": "build_request",
-  "title": "Add homepage voting-results promo section plus voting widgets and admin-managed results",
+  "title": "Fix homepage sections not rendering and add visible error states",
   "projectName": "Smart Janghai",
-  "priority": "normal",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a new promotional section at the very top of the homepage (above the existing hero section) with the exact title text: \"GRAM PRADHAN VOTING LIVE RESULT OF WHOLE VILLAGES AROUND JANGHAI COMMING SOON STAY TUNED WITH US...\". The section must be visually prominent and clearly separated from the hero.",
+      "text": "Fix the app-wide loading gate so the UI does not get stuck on the global “Loading…” screen when the backend actor is temporarily null/unavailable during initialization; the Home page (and other routes) must still render in a fail-open manner unless the backend explicitly reports decommissioning.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "ADD NEW SECTOIN AND ALSO PROMOTE THIS SECTION IN FRONT PAGE  WITH THE TITLE OF GRAM PRADHAN VOTING LIVE RESULT OF WHOLE VILLAGES AROUND JANGHAI COMMING SOON STAY TUNED WITH US...",
-          "1"
+          "ANYTHING NOT SHOWING ACCORDING ME"
         ]
       },
       "acceptanceCriteria": [
-        "On the homepage, a new section renders above the current Hero Section.",
-        "The title text matches exactly (including capitalization/spelling) what the user provided.",
-        "The section is styled to be visually prominent (e.g., banner/card with strong typography) and responsive across mobile and desktop."
+        "When the backend actor is not yet ready, the app renders the Home page instead of an indefinite full-screen loading state.",
+        "If the backend is decommissioned (trap message contains \"decommissioned\" or \"Service Unavailable\"), the Decommissioned page still renders reliably.",
+        "The app does not poll the URL hash at a high frequency while in a non-interactive loading state (no unnecessary 100ms loop contributing to perceived blank/\"not showing\" behavior)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement a 'Live Results (Coming Soon)' results widget inside the new homepage section that can display vote counts per village/candidate from the backend and automatically refreshes periodically (polling) to simulate live updates.",
-      "target": "both",
+      "text": "Ensure the top-of-homepage VotingPromoSection (including LivePollWidget and LiveVotingResultsWidget) always displays a clear UI state for loading, empty data, and errors instead of rendering nothing; all user-facing messages must be in English.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "“Generate a complete web SECTION that displays live voting results on a website.",
-          "It should include: • A frontend UI to show live vote counts dynamically updating.”"
+          "ANYTHING NOT SHOWING ACCORDING ME"
         ]
       },
       "acceptanceCriteria": [
-        "Homepage section includes a results UI that renders a list/table of villages and vote counts (or an empty-state when no data exists).",
-        "The widget refreshes results automatically at a fixed interval (e.g., every 5–10 seconds) without requiring a page reload.",
-        "Loading, empty, and error states are handled gracefully and are user-friendly in English."
+        "On the Home page, the VotingPromoSection is visible at the top of the page on first load (regardless of whether a poll exists).",
+        "If live poll/voting result queries fail, the user sees a readable inline error message in the widget area (not a blank section).",
+        "If there is no active poll, the user sees the existing “No Active Poll” state (or equivalent) instead of empty space."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add backend support in the Motoko main actor to store and serve voting result data (villages, candidates, and counts) and expose public query methods to fetch results plus admin-only update methods to create/update/delete result entries.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "BOTH",
-          "“Generate a complete web SECTION that displays live voting results on a website.”"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend exposes at least one public query method to retrieve the current voting results dataset used by the homepage widget.",
-        "Backend exposes admin-only shared methods to upsert and delete voting result entries (villages/candidates/counts).",
-        "Unauthorized callers attempting to modify results receive an authorization error/trap consistent with existing admin protections."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Add an Admin 'Voting Results' management plugin (new admin module) that allows admins to manage the dataset shown on the homepage results widget (add/edit/remove villages/candidates and update counts).",
+      "text": "Replace silent rendering failures with visible fallbacks for notification UI: if NotificationPanelErrorBoundary catches an error, show a small inline fallback message (in English) rather than returning null so users do not experience missing UI with no explanation.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "1 ADD NEW PLUGINS",
-          "BOTH"
+          "ANYTHING NOT SHOWING ACCORDING ME"
         ]
       },
       "acceptanceCriteria": [
-        "Admin sidebar includes a new menu item for Voting Results, visible only in admin mode.",
-        "Admin module provides CRUD UI for voting results with validation and clear English labels.",
-        "Saving changes updates backend data and causes the homepage widget to reflect updated data after the next refresh (or via query invalidation)."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Add at least one additional 'plugin/widget' outside of the new voting section to satisfy the request for plugins elsewhere on the site, implemented as a non-invasive UI enhancement on the front page (e.g., a slim announcement ribbon or compact highlight card) referencing the same 'Coming Soon' message.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "BOTH"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A second, distinct widget appears somewhere else on the homepage outside the new top voting section (not inside it).",
-        "The widget is responsive, does not break existing homepage layout, and uses English text.",
-        "The widget can be disabled/removed by code easily (encapsulated component), and does not require external services."
+        "If the notification panel subtree throws, the page still loads and a compact fallback message is shown where the notification launcher/panel would appear.",
+        "Console logging remains for debugging, but the user also gets an on-screen indication that notifications failed to load.",
+        "Normal (non-error) behavior of notification launcher and panel is unchanged."
       ]
     }
   ],
   "constraints": [
-    "Do not introduce unsupported backend technologies (no Node.js/Express, Python/Flask, Firebase, external databases, or WebSockets/SSE).",
-    "Keep all backend logic in the single Motoko actor at backend/main.mo (single-actor architecture).",
-    "Do not modify any frontend files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
-    "All user-facing text added/changed must be in English."
+    "Do not edit files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT (compose components instead).",
+    "Keep all user-facing text in English."
   ],
   "nonGoals": [
-    "Implementing true real-time updates via WebSockets/Socket.IO or Server-Sent Events.",
-    "Integrating external databases like PostgreSQL/MySQL/MongoDB/Redis.",
-    "Building an end-user vote-submission system intended for secure elections (authentication/anti-fraud/one-person-one-vote guarantees).",
-    "Deploy instructions for non-Internet-Computer infrastructure."
+    "Do not add new voting/poll features beyond making existing sections reliably visible.",
+    "Do not change backend schemas or require a migration unless a concrete backend rendering blocker is identified and confirmed."
   ],
   "imageRequirements": {
     "required": [],

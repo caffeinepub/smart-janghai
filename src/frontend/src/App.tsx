@@ -13,8 +13,8 @@ export default function App() {
   // Initialize from URL hash
   const [currentPage, setCurrentPage] = useState<PageType>(() => parseHashToPage());
 
-  // Check decommission status
-  const { data: systemStatus, isLoading: statusLoading, isFetched: statusFetched } = useSystemStatus();
+  // Check decommission status (non-blocking)
+  const { data: systemStatus } = useSystemStatus();
   const isDecommissioned = systemStatus?.isDecommissioned ?? false;
 
   // Listen to hash changes (browser back/forward, manual hash edits)
@@ -28,22 +28,14 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Sync state with URL on mount and when URL changes outside of hashchange
+  // Sync state with URL on mount only
   useEffect(() => {
-    const syncWithURL = () => {
-      const urlPage = parseHashToPage();
-      if (urlPage !== currentPage) {
-        setCurrentPage(urlPage);
-      }
-    };
-
-    // Check on mount
-    syncWithURL();
-
-    // Also check periodically to catch any edge cases
-    const interval = setInterval(syncWithURL, 100);
-    return () => clearInterval(interval);
-  }, [currentPage]);
+    const urlPage = parseHashToPage();
+    if (urlPage !== currentPage) {
+      setCurrentPage(urlPage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Centralized navigation handler that updates both state and URL hash
   const handleNavigate = (page: PageType) => {
@@ -52,24 +44,12 @@ export default function App() {
   };
 
   const renderPage = () => {
-    // Show loading state while checking decommission status
-    if (statusLoading || !statusFetched) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">Loading...</p>
-          </div>
-        </div>
-      );
-    }
-
     // If decommissioned, always show decommissioned page regardless of route
     if (isDecommissioned) {
       return <DecommissionedPage />;
     }
 
-    // Normal routing when not decommissioned
+    // Normal routing when not decommissioned (fail-open: render immediately)
     switch (currentPage) {
       case 'login':
         return <MemberLoginPage onNavigate={handleNavigate} />;

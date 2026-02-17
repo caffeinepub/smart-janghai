@@ -68,6 +68,10 @@ export interface Job {
 export type JobId = string;
 export type JobStatus = { 'active' : null } |
   { 'expired' : null };
+export interface LivePoll {
+  'endTime' : [] | [Time],
+  'candidates' : Array<PollCandidate>,
+}
 export interface Media {
   'id' : MediaId,
   'contentType' : string,
@@ -108,6 +112,10 @@ export interface Notification {
   'delivered' : boolean,
 }
 export type NotificationId = bigint;
+export interface PollCandidate { 'votes' : bigint, 'name' : string }
+export type PollStatus = { 'expired' : null } |
+  { 'ongoing' : null };
+export interface PollVote { 'principal' : Principal, 'candidateName' : string }
 export type Principal = Principal;
 export interface RecentActivity {
   'activityType' : ActivityType,
@@ -203,6 +211,7 @@ export interface _SERVICE {
     [string, Array<Principal>],
     NotificationId
   >,
+  'createOrUpdatePoll' : ActorMethod<[Array<string>, [] | [Time]], undefined>,
   'createScheme' : ActorMethod<
     [string, string, string, string, Array<MediaId>],
     SchemeId
@@ -229,10 +238,12 @@ export interface _SERVICE {
       'jobs' : Array<[string, Job]>,
       'news' : Array<[string, News]>,
       'schemes' : Array<[string, Scheme]>,
+      'pollVotes' : Array<[Principal, PollVote]>,
       'users' : Array<[Principal, User]>,
       'nextNotificationId' : bigint,
       'votingResults' : Array<[string, VotingResult]>,
       'websiteSettings' : Array<[string, WebsiteSettings]>,
+      'activePoll' : [] | [LivePoll],
     }
   >,
   'getActiveJobs' : ActorMethod<[], Array<Job>>,
@@ -253,6 +264,14 @@ export interface _SERVICE {
   'getMedia' : ActorMethod<[MediaId], [] | [Media]>,
   'getMonthlyGrowth' : ActorMethod<[bigint], Array<MonthlyGrowth>>,
   'getNotificationsForUser' : ActorMethod<[UserId], Array<Notification>>,
+  'getPollResults' : ActorMethod<
+    [],
+    { 'status' : PollStatus, 'candidates' : [] | [Array<PollCandidate>] }
+  >,
+  'getPollStatus' : ActorMethod<
+    [],
+    { 'status' : PollStatus, 'poll' : [] | [LivePoll] }
+  >,
   'getPublishedNewsByCategory' : ActorMethod<[string], Array<News>>,
   'getRecentActivity' : ActorMethod<[bigint], Array<RecentActivity>>,
   'getScheme' : ActorMethod<[SchemeId], [] | [Scheme]>,
@@ -264,6 +283,7 @@ export interface _SERVICE {
   'publishNews' : ActorMethod<[NewsId], undefined>,
   'recordActivity' : ActorMethod<[ActivityLog], undefined>,
   'recordAdminActivity' : ActorMethod<[ActivityType, string], undefined>,
+  'resetPoll' : ActorMethod<[], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'searchMediaByType' : ActorMethod<[string], Array<Media>>,
   'setUserStatus' : ActorMethod<[Principal, UserStatus], undefined>,
@@ -287,6 +307,7 @@ export interface _SERVICE {
   >,
   'updateWebsiteSettings' : ActorMethod<[WebsiteSettings], undefined>,
   'uploadMedia' : ActorMethod<[string, string, ExternalBlob, bigint], MediaId>,
+  'vote' : ActorMethod<[string], string>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

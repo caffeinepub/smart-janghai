@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -24,8 +25,13 @@ export default class NotificationPanelErrorBoundary extends Component<Props, Sta
 
   render() {
     if (this.state.hasError) {
-      // Fail silently - render nothing so the page remains functional
-      return null;
+      // Show a compact inline fallback instead of rendering nothing
+      return (
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+          <AlertCircle className="w-4 h-4" />
+          <span>Notifications unavailable</span>
+        </div>
+      );
     }
 
     return this.props.children;

@@ -1,119 +1,68 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Smart Janghai — Homepage voting promo + live results widget + admin voting results module",
+  "title": "Fix fail-open app initialization and add visible error/empty states for home sections",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add a visually prominent promotional banner section above the existing homepage hero with the exact provided title text.",
+      "summary": "Make app initialization fail-open so routes render without getting stuck on a global loading screen; keep decommission detection reliable and remove high-frequency hash polling.",
       "acceptanceCriteria": [
-        "On the homepage, a new section renders above the current Hero Section.",
-        "The title text matches exactly (including capitalization/spelling) what the user provided.",
-        "The section is styled to be visually prominent (e.g., banner/card with strong typography) and responsive across mobile and desktop."
+        "When the backend actor is not yet ready, the app renders the Home page instead of an indefinite full-screen loading state.",
+        "If the backend is decommissioned (trap message contains \"decommissioned\" or \"Service Unavailable\"), the Decommissioned page still renders reliably.",
+        "The app does not poll the URL hash at a high frequency while in a non-interactive loading state (no unnecessary 100ms loop contributing to perceived blank/\"not showing\" behavior)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/HomePage.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Insert a new top-of-page promotional section above the current Hero section containing the exact title text: \"GRAM PRADHAN VOTING LIVE RESULT OF WHOLE VILLAGES AROUND JANGHAI COMMING SOON STAY TUNED WITH US...\". Use shadcn-ui Card/typography utilities to make it clearly separated from the hero and responsive. Verify the component's usage instructions before implementing."
+          "description": "Remove the full-screen global \"Loading...\" gate as a prerequisite for rendering non-decommissioned routes; render pages immediately (fail-open) while decommission status is still being determined, and keep DecommissionedPage as an override when detected. Remove the 100ms setInterval URL-hash sync loop and rely on hashchange + initial mount sync only."
         },
         {
-          "path": "frontend/src/components/site/VotingPromoSection.tsx",
-          "operation": "create",
-          "description": "Create a reusable homepage-only section component that renders the promo banner container and composes the live results widget (REQ-2) within it while keeping layout/spacing distinct from the hero. Use shadcn-ui components (e.g., Card) for prominence. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/hooks/useSystemStatus.ts",
+          "operation": "modify",
+          "description": "Adjust system status fetching to be non-blocking for initial UI: treat missing actor during initialization as \"not decommissioned\" without preventing render, and ensure decommission trap detection still sets isDecommissioned true when calls become possible."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add a homepage 'Live Results (Coming Soon)' widget that fetches voting results from the backend and polls periodically with friendly loading/empty/error states.",
+      "summary": "Ensure VotingPromoSection widgets always render visible loading, empty, and error states with English user-facing messaging.",
       "acceptanceCriteria": [
-        "Homepage section includes a results UI that renders a list/table of villages and vote counts (or an empty-state when no data exists).",
-        "The widget refreshes results automatically at a fixed interval (e.g., every 5–10 seconds) without requiring a page reload.",
-        "Loading, empty, and error states are handled gracefully and are user-friendly in English."
+        "On the Home page, the VotingPromoSection is visible at the top of the page on first load (regardless of whether a poll exists).",
+        "If live poll/voting result queries fail, the user sees a readable inline error message in the widget area (not a blank section).",
+        "If there is no active poll, the user sees the existing “No Active Poll” state (or equivalent) instead of empty space."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/votingResults.ts",
-          "operation": "create",
-          "description": "Add React Query hooks to fetch the voting results dataset via the existing backend actor method getAllVotingResults(), including a polling refetchInterval (e.g., 5–10 seconds) and sensible retry behavior for user-friendly error handling. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/site/LiveVotingResultsWidget.tsx",
-          "operation": "create",
-          "description": "Implement the 'Live Results (Coming Soon)' widget UI using shadcn-ui building blocks (e.g., Card/Table/Badge/Skeleton as needed) to render village, candidate, votes, and last-updated. Include clear English loading, empty, and error states, and read data via the polling hook. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/site/LivePollWidget.tsx",
+          "operation": "modify",
+          "description": "Add explicit UI branches for poll status/results query errors (e.g., show an inline Alert within the widget area) so failures never look like empty space; keep all displayed messages in English and avoid misleading \"No Active Poll\" when the real state is a load failure."
         },
         {
           "path": "frontend/src/components/site/VotingPromoSection.tsx",
           "operation": "modify",
-          "description": "Wire LiveVotingResultsWidget into the promo section so the widget appears inside the new top homepage section. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Replace the inline promo markup (if any) with the VotingPromoSection component so polling results render on the homepage above the hero without breaking existing layout. Verify the component's usage instructions before implementing."
+          "description": "Ensure the section layout always reserves visible space for the poll/results widget area (no conditional rendering that could collapse the top section), and keep user-facing text in English."
         }
       ]
     },
     {
-      "id": "REQ-4",
-      "summary": "Add an admin 'Voting Results' module to CRUD voting results shown on the homepage widget, visible only in admin mode.",
+      "id": "REQ-3",
+      "summary": "Show a compact on-screen fallback when NotificationPanelErrorBoundary catches errors instead of rendering nothing.",
       "acceptanceCriteria": [
-        "Admin sidebar includes a new menu item for Voting Results, visible only in admin mode.",
-        "Admin module provides CRUD UI for voting results with validation and clear English labels.",
-        "Saving changes updates backend data and causes the homepage widget to reflect updated data after the next refresh (or via query invalidation)."
+        "If the notification panel subtree throws, the page still loads and a compact fallback message is shown where the notification launcher/panel would appear.",
+        "Console logging remains for debugging, but the user also gets an on-screen indication that notifications failed to load.",
+        "Normal (non-error) behavior of notification launcher and panel is unchanged."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/admin/votingResults.ts",
-          "operation": "create",
-          "description": "Create admin React Query hooks for voting results management using existing actor methods: getAllVotingResults(), createVotingResult(), updateVotingResult(), deleteVotingResult(). Ensure mutations invalidate the voting results query key so the homepage polling and admin views reflect changes. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/modules/VotingResultsModuleView.tsx",
-          "operation": "create",
-          "description": "Add a new admin module view for 'Voting Results' management, following existing admin module patterns (header + list + create/edit dialog). Use shadcn-ui Dialog/Button/Card components for consistent UX. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/voting-results/VotingResultsList.tsx",
-          "operation": "create",
-          "description": "Implement an admin searchable table/list for voting results with Edit/Delete actions, using the existing AdminDataTable and DeleteConfirmDialog patterns for a consistent admin UX. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/voting-results/VotingResultForm.tsx",
-          "operation": "create",
-          "description": "Implement a create/edit form with validation for village, candidate, and votes (numeric >= 0). Use shadcn-ui Input/Label and the existing FormErrorText for clear English validation messages. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/AdminModuleRouter.tsx",
+          "path": "frontend/src/components/notifications/NotificationPanelErrorBoundary.tsx",
           "operation": "modify",
-          "description": "Register a new admin module route key (e.g., 'voting-results') that renders VotingResultsModuleView. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/dashboard/DashboardSidebar.tsx",
-          "operation": "modify",
-          "description": "Add a new admin-only sidebar menu item labeled 'Voting Results' that maps to the new admin module key and is only present in admin mode (adminMenuItems). Use an existing lucide icon for consistency. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Add a second distinct, non-invasive homepage widget outside the new voting promo section that references the same 'Coming Soon' message and is easily removable.",
-      "acceptanceCriteria": [
-        "A second, distinct widget appears somewhere else on the homepage outside the new top voting section (not inside it).",
-        "The widget is responsive, does not break existing homepage layout, and uses English text.",
-        "The widget can be disabled/removed by code easily (encapsulated component), and does not require external services."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/site/ComingSoonRibbon.tsx",
-          "operation": "create",
-          "description": "Create a small, encapsulated homepage enhancement widget (e.g., slim announcement ribbon / compact highlight card) that references the same 'Coming Soon' message in English and can be removed by deleting one component usage. Use shadcn-ui styling primitives (e.g., Card/Badge) as appropriate. Verify the component's usage instructions before implementing."
+          "description": "Replace the current silent null render on error with a small inline fallback message (English) suitable for both the launcher location and panel location; keep existing console.error logging for debugging."
         },
         {
           "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Place the ComingSoonRibbon somewhere on the homepage outside the new top voting promo section (e.g., between the hero and categories, or near the bottom), ensuring it is responsive and does not disrupt existing layout. Verify the component's usage instructions before implementing."
+          "description": "Verify the notification launcher and panel placements still look correct with the error-boundary fallback present (top-right hero launcher area and the bottom-mounted panel boundary), without changing normal behavior when no error occurs."
         }
       ]
     }

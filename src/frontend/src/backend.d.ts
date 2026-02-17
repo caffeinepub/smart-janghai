@@ -14,13 +14,12 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
-export interface UserProfile {
-    name: string;
-    email: string;
-    mobile: string;
-}
 export type SettingsId = string;
 export type Time = bigint;
+export interface PollCandidate {
+    votes: bigint;
+    name: string;
+}
 export interface AdminActivity {
     principal: Principal;
     activityType: ActivityType;
@@ -51,6 +50,10 @@ export interface Job {
 }
 export type VotingResultId = string;
 export type SchemeId = string;
+export interface PollVote {
+    principal: Principal;
+    candidateName: string;
+}
 export interface Media {
     id: MediaId;
     contentType: string;
@@ -103,6 +106,10 @@ export interface Scheme {
 }
 export type JobId = string;
 export type UserId = Principal;
+export interface LivePoll {
+    endTime?: Time;
+    candidates: Array<PollCandidate>;
+}
 export type ActivityLogId = bigint;
 export type NotificationId = bigint;
 export interface Notification {
@@ -135,6 +142,11 @@ export interface DashboardMetrics {
     activeJobs: bigint;
 }
 export type MediaId = string;
+export interface UserProfile {
+    name: string;
+    email: string;
+    mobile: string;
+}
 export enum ActivityType {
     mediaDeleted = "mediaDeleted",
     newsPublished = "newsPublished",
@@ -168,6 +180,10 @@ export enum NewsStatus {
     rejected = "rejected",
     draft = "draft"
 }
+export enum PollStatus {
+    expired = "expired",
+    ongoing = "ongoing"
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
@@ -183,6 +199,7 @@ export interface backendInterface {
     createJob(companyName: string, salary: bigint, qualification: string, applyLink: string, expiryDate: Time): Promise<JobId>;
     createNews(title: string, description: string, category: string, tags: Array<string>, featuredImage: MediaId | null): Promise<NewsId>;
     createNotification(message: string, recipients: Array<Principal>): Promise<NotificationId>;
+    createOrUpdatePoll(candidates: Array<string>, endTime: Time | null): Promise<void>;
     createScheme(name: string, eligibilityDetails: string, applyLink: string, importantDates: string, documents: Array<MediaId>): Promise<SchemeId>;
     createUser(targetUserId: Principal, name: string, mobile: string, email: string, role: UserRole): Promise<void>;
     createVotingResult(village: string, candidate: string, votes: bigint): Promise<VotingResultId>;
@@ -201,10 +218,12 @@ export interface backendInterface {
         jobs: Array<[string, Job]>;
         news: Array<[string, News]>;
         schemes: Array<[string, Scheme]>;
+        pollVotes: Array<[Principal, PollVote]>;
         users: Array<[Principal, User]>;
         nextNotificationId: bigint;
         votingResults: Array<[string, VotingResult]>;
         websiteSettings: Array<[string, WebsiteSettings]>;
+        activePoll?: LivePoll;
     }>;
     getActiveJobs(): Promise<Array<Job>>;
     getAdminActivityLog(): Promise<Array<AdminActivity>>;
@@ -224,6 +243,14 @@ export interface backendInterface {
     getMedia(id: MediaId): Promise<Media | null>;
     getMonthlyGrowth(months: bigint): Promise<Array<MonthlyGrowth>>;
     getNotificationsForUser(userId: UserId): Promise<Array<Notification>>;
+    getPollResults(): Promise<{
+        status: PollStatus;
+        candidates?: Array<PollCandidate>;
+    }>;
+    getPollStatus(): Promise<{
+        status: PollStatus;
+        poll?: LivePoll;
+    }>;
     getPublishedNewsByCategory(category: string): Promise<Array<News>>;
     getRecentActivity(limit: bigint): Promise<Array<RecentActivity>>;
     getScheme(id: SchemeId): Promise<Scheme | null>;
@@ -235,6 +262,7 @@ export interface backendInterface {
     publishNews(id: NewsId): Promise<void>;
     recordActivity(activity: ActivityLog): Promise<void>;
     recordAdminActivity(activityType: ActivityType, details: string): Promise<void>;
+    resetPoll(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     searchMediaByType(contentType: string): Promise<Array<Media>>;
     setUserStatus(id: Principal, status: UserStatus): Promise<void>;
@@ -246,4 +274,5 @@ export interface backendInterface {
     updateVotingResult(id: VotingResultId, village: string, candidate: string, votes: bigint): Promise<void>;
     updateWebsiteSettings(settings: WebsiteSettings): Promise<void>;
     uploadMedia(filename: string, contentType: string, fileReference: ExternalBlob, size: bigint): Promise<MediaId>;
+    vote(candidateName: string): Promise<string>;
 }

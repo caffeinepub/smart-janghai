@@ -65,6 +65,16 @@ export default {
                     'accent-foreground': 'oklch(var(--sidebar-accent-foreground))',
                     border: 'oklch(var(--sidebar-border))',
                     ring: 'oklch(var(--sidebar-ring))'
+                },
+                poll: {
+                    bg: 'oklch(var(--poll-bg))',
+                    foreground: 'oklch(var(--poll-foreground))',
+                    header: 'oklch(var(--poll-header))',
+                    card: 'oklch(var(--poll-card))',
+                    border: 'oklch(var(--poll-border))',
+                    accent: 'oklch(var(--poll-accent))',
+                    'accent-foreground': 'oklch(var(--poll-accent-foreground))',
+                    muted: 'oklch(var(--poll-muted))'
                 }
             },
             borderRadius: {

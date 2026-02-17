@@ -12,6 +12,7 @@ export function useSystemStatus() {
     queryKey: ['systemStatus'],
     queryFn: async () => {
       if (!actor) {
+        // Non-blocking: treat missing actor as "not decommissioned" to allow UI to render
         return { isDecommissioned: false };
       }
 
@@ -40,9 +41,5 @@ export function useSystemStatus() {
     refetchOnWindowFocus: true,
   });
 
-  return {
-    ...query,
-    isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && query.isFetched,
-  };
+  return query;
 }
